@@ -1,0 +1,41 @@
+{
+  "title": "CISA Catalog of Known Exploited Vulnerabilities",
+  "catalogVersion": "2026.05.21",
+  "dateReleased": "2026-05-21T08:00:00.000Z",
+  "count": 3,
+  "vulnerabilities": [
+    {
+      "cveID": "CVE-2024-12345",
+      "vendorProject": "Acme Corp",
+      "product": "WidgetServer",
+      "vulnerabilityName": "Acme WidgetServer Remote Code Execution",
+      "dateAdded": "2026-05-01",
+      "shortDescription": "An unauthenticated attacker can execute arbitrary code via crafted HTTP requests.",
+      "requiredAction": "Apply vendor patch in advisory ACME-2024-001.",
+      "dueDate": "2026-05-22",
+      "knownRansomwareCampaignUse": "Known"
+    },
+    {
+      "cveID": "CVE-2023-99999",
+      "vendorProject": "Globex",
+      "product": "AuthGateway",
+      "vulnerabilityName": "Globex AuthGateway Authentication Bypass",
+      "dateAdded": "2026-04-15",
+      "shortDescription": "Authentication can be bypassed via a crafted SAML response.",
+      "requiredAction": "Upgrade to 5.2.1 or later.",
+      "dueDate": "2026-05-06",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2022-11111",
+      "vendorProject": "Initech",
+      "product": "TPSReport",
+      "vulnerabilityName": "Initech TPSReport Path Traversal",
+      "dateAdded": "2026-03-10",
+      "shortDescription": "Path traversal via unsanitized filename parameter.",
+      "requiredAction": "Apply vendor patch.",
+      "dueDate": "2026-03-31",
+      "knownRansomwareCampaignUse": "Unknown"
+    }
+  ]
+}

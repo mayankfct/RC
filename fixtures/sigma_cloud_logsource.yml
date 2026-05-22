@@ -1,0 +1,19 @@
+title: Azure Sign-In From Suspicious Country
+id: 11111111-2222-3333-4444-555555555555
+status: experimental
+description: Detects Azure AD sign-in events originating from countries that are unusual for the organization. This is a cloud-based detection and is not in scope for the EaglEye endpoint pipeline. It should be rejected by RuleForge.
+references:
+    - https://docs.microsoft.com/azure/sign-in-logs
+author: Sigma Community
+date: 2024-03-10
+tags:
+    - attack.initial-access
+    - attack.t1078.004
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection:
+        Location: 'KP'
+    condition: selection
+level: medium

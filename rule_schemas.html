@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDR — Rule Schemas (Final)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090d;--bg2:#0e1018;--bg3:#141720;--bg4:#1a1e28;--bg5:#202535;
+  --line:#252a38;--line2:#2f3548;
+  --text:#dde2f0;--text2:#8892a8;--text3:#464f65;
+  --blue:#3d7fff;--blue-dim:#0d1f3d;
+  --green:#1dc98a;--green-dim:#0a2e1e;
+  --amber:#f0a500;--amber-dim:#2e1e00;
+  --red:#ff4466;--red-dim:#2e0a14;
+  --purple:#9b6eff;--purple-dim:#1a0f35;
+  --teal:#00d4c8;--teal-dim:#002e2c;
+  --mono:'DM Mono',monospace;
+  --sans:'Outfit',sans-serif;
+  --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:240px;min-width:240px;background:var(--bg2);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;padding:24px 0}
+.sb-logo{padding:0 18px 20px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sb-eyebrow{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
+.sb-title{font-size:15px;font-weight:700;letter-spacing:-.02em;line-height:1.3}
+.sb-section{padding:0 10px;margin-bottom:4px}
+.sb-section-label{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--mono);padding:8px 8px 4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .12s;text-decoration:none;border:none;background:none;width:100%;text-align:left}
+.sb-item:hover{background:var(--bg3);color:var(--text)}
+.sb-item.on{background:var(--bg4);color:var(--blue)}
+.sb-num{width:17px;height:17px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0;font-family:var(--mono);background:var(--bg4);color:var(--text3)}
+.sb-item.on .sb-num{background:var(--blue-dim);color:var(--blue)}
+.main{flex:1;padding:36px 44px 60px;max-width:980px;overflow:hidden}
+.section{display:none}.section.on{display:block}
+.page-eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-family:var(--mono);margin-bottom:8px}
+.page-title{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:10px}
+.page-desc{font-size:13.5px;color:var(--text2);max-width:720px;line-height:1.7;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+h3{font-size:14px;font-weight:600;margin:22px 0 8px;color:var(--text)}
+h3:first-child{margin-top:0}
+h4{font-size:12px;font-weight:600;color:var(--text2);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)}
+p{color:var(--text2);font-size:13px;margin-bottom:10px;line-height:1.65}
+code{font-family:var(--mono);background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11.5px;color:#7ba7ff}
+.code-block{margin:10px 0 16px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.code-label{display:flex;justify-content:space-between;align-items:center;background:var(--bg4);padding:7px 14px;font-size:10.5px;color:var(--text3);font-family:var(--mono);border-bottom:1px solid var(--line)}
+.copy-btn{cursor:pointer;background:none;border:none;color:var(--text3);font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;transition:all .12s}
+.copy-btn:hover{background:var(--bg5);color:var(--text2)}
+pre{background:var(--bg3);padding:14px 16px;font-family:var(--mono);font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre;tab-size:2}
+.kw{color:#7ba7ff}.fn{color:#57e0c5}.str{color:#7ecf5a}.cmt{color:#3d4a62;font-style:italic}.ty{color:#e8b56a}.num{color:var(--amber)}.req{color:var(--red)}.opt{color:var(--text3)}
+.note{border-left:3px solid var(--blue);padding:9px 13px;border-radius:0 7px 7px 0;font-size:12px;color:var(--text2);margin:8px 0 14px;line-height:1.65;background:rgba(61,127,255,.06)}
+.note.ok{border-left-color:var(--green);background:rgba(29,201,138,.06)}
+.note.warn{border-left-color:var(--amber);background:rgba(240,165,0,.06)}
+.note.danger{border-left-color:var(--red);background:rgba(255,68,102,.06)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10.5px;font-family:var(--mono);font-weight:500;letter-spacing:.04em}
+.t-req{background:rgba(255,68,102,.15);color:var(--red)}
+.t-opt{background:var(--bg4);color:var(--text2)}
+.t-def{background:rgba(61,127,255,.12);color:var(--blue)}
+.dt{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0 16px}
+.dt th{text-align:left;padding:8px 10px;font-size:11px;color:var(--text3);border-bottom:1px solid var(--line);font-family:var(--mono);letter-spacing:.06em;background:var(--bg2)}
+.dt td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text2);line-height:1.55}
+.dt tr:last-child td{border-bottom:none}
+.dt td:first-child{color:var(--text);font-weight:500;font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+.dt td.type{color:#e8b56a;font-family:var(--mono);font-size:11px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-eyebrow">EDR · Rule Schemas</div>
+    <div class="sb-title">Final Schema<br>Reference</div>
+  </div>
+
+  <div class="sb-section-label">Schemas</div>
+  <div class="sb-section">
+    <button class="sb-item on" onclick="show('overview')"><span class="sb-num">·</span>Overview</button>
+    <button class="sb-item" onclick="show('sigma')"><span class="sb-num">S</span>Sigma rule</button>
+    <button class="sb-item" onclick="show('yara')"><span class="sb-num">Y</span>YARA rule</button>
+    <button class="sb-item" onclick="show('behavioral')"><span class="sb-num">B</span>Behavioral rule</button>
+    <button class="sb-item" onclick="show('signature')"><span class="sb-num">H</span>Signature feed</button>
+    <button class="sb-item" onclick="show('ml')"><span class="sb-num">M</span>ML model</button>
+  </div>
+
+  <div class="sb-section-label">Cross-cutting</div>
+  <div class="sb-section">
+    <button class="sb-item" onclick="show('mitre')"><span class="sb-num">⚔</span>Tactics &amp; Techniques</button>
+    <button class="sb-item" onclick="show('fptuning')"><span class="sb-num">F</span>FP tuning log</button>
+    <button class="sb-item" onclick="show('manifest')"><span class="sb-num">N</span>Bundle manifest</button>
+    <button class="sb-item" onclick="show('alert')"><span class="sb-num">A</span>AlertRecord (output)</button>
+    <button class="sb-item" onclick="show('event')"><span class="sb-num">E</span>NormalizedEvent (input)</button>
+    <button class="sb-item" onclick="show('tree')"><span class="sb-num">T</span>Process tree &amp; lineage</button>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- ══════════════ OVERVIEW ══════════════ -->
+<section class="section on" id="overview">
+  <div class="page-eyebrow">Schemas · Final</div>
+  <div class="page-title">Rule schemas for the<br>detection module</div>
+  <div class="page-desc">The contracts a rule author must satisfy and the agent's compile step enforces. Sigma is YAML on the wire; YARA is the standard language constrained to the agent's allowed feature set; behavioral is YAML compiled to MessagePack; signatures live in a Bloom + side index. Every rule type produces the same AlertRecord output.</div>
+
+  <h3>Why these schemas, why this strict</h3>
+  <p>A rule that compiles to slightly the wrong shape doesn't fail loudly — it silently never matches. The schemas here are deliberately narrow: required fields are required, modifiers are an explicit allowlist, names are exact-match against the agent's <code>NormalizedEvent</code> struct. CI rejects anything outside the schema before it reaches an agent. This is not bureaucracy — it's the only way to keep the rule corpus debuggable as it grows past a few hundred rules.</p>
+
+  <h3>What ships to the agent vs what authors write</h3>
+  <table class="dt">
+    <tr><th>Engine</th><th>Author writes</th><th>CI produces</th><th>Agent loads</th></tr>
+    <tr><td>Sigma</td><td><code>.yml</code></td><td>schema-validated <code>.yml</code></td><td>parses to <code>CompiledMatcher</code> in memory</td></tr>
+    <tr><td>YARA</td><td><code>.yar</code></td><td><code>.yrc</code> compiled by <code>yarac</code></td><td>loads <code>.yrc</code> via yara-x</td></tr>
+    <tr><td>Behavioral</td><td><code>.yml</code></td><td><code>chains.msgpack</code></td><td>parses MessagePack to <code>ChainPattern</code></td></tr>
+    <tr><td>Signatures</td><td><code>feeds.toml</code></td><td><code>*.bloom</code> + <code>verdicts</code> table</td><td>mmaps <code>.bloom</code> file</td></tr>
+    <tr><td>ML</td><td>training pipeline output</td><td><code>.onnx</code> (INT8-quantized)</td><td>loads via ONNX Runtime</td></tr>
+  </table>
+
+  <h3>Universal fields — every rule type has these</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>id</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>Unique across ALL rule types. Format: <code>R-NNN</code> Sigma · <code>Y-NNN</code> YARA · <code>CP-NNN / B-X-NNN</code> behavioral.</td></tr>
+    <tr><td>title</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>One-line human title. Shows in alert console.</td></tr>
+    <tr><td>status</td><td class="type">enum</td><td><span class="tag t-req">yes</span></td><td><code>experimental</code> · <code>test</code> · <code>stable</code>. Path on disk MUST match.</td></tr>
+    <tr><td>description</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>Multi-line. What it detects + why this approach + known gaps.</td></tr>
+    <tr><td>severity</td><td class="type">enum</td><td><span class="tag t-req">yes</span></td><td><code>critical</code> · <code>high</code> · <code>medium</code> · <code>low</code>. Only <code>critical</code> may set <code>auto_action</code>.</td></tr>
+    <tr><td>mitre</td><td class="type">object</td><td><span class="tag t-req">yes</span></td><td>Structured tactic+technique block. See <a href="#" onclick="show('mitre')">Tactics &amp; Techniques</a> page for the full schema. One <code>primary</code> + optional <code>secondary</code> list.</td></tr>
+    <tr><td>author</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>Person / team. CI rejects edits that don't update this when changing logic.</td></tr>
+    <tr><td>date</td><td class="type">date</td><td><span class="tag t-req">yes</span></td><td>ISO-8601. Last logic edit, not creation.</td></tr>
+    <tr><td>version</td><td class="type">int</td><td><span class="tag t-opt">opt</span></td><td>Bumps on detection-logic changes. Default <code>1</code>. See <a href="#" onclick="show('fptuning')">FP tuning log</a> page for version vs revision.</td></tr>
+    <tr><td>revision</td><td class="type">int</td><td><span class="tag t-opt">opt</span></td><td>Bumps on filter-only changes (FP tuning). Default <code>1</code>. Decoupled from <code>version</code> so customers can opt out of FP-tuning churn while staying on logic changes.</td></tr>
+    <tr><td>references</td><td class="type">[string]</td><td><span class="tag t-opt">opt</span></td><td>URLs to ATT&CK pages, vendor blogs, original disclosure.</td></tr>
+    <tr><td>tags</td><td class="type">[string]</td><td><span class="tag t-opt">opt</span></td><td>Free-form. Used for analyst filtering in console.</td></tr>
+    <tr><td>dedup_window_seconds</td><td class="type">int</td><td><span class="tag t-opt">opt</span></td><td>Per <code>(rule_id, pid)</code>. Default <code>60</code>. Suppress duplicates within window.</td></tr>
+    <tr><td>auto_action</td><td class="type">enum</td><td><span class="tag t-opt">opt</span></td><td><code>none</code> · <code>suspend_process</code> · <code>quarantine_file</code>. <strong>Only valid on severity=critical.</strong> CI rejects otherwise.</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ SIGMA SCHEMA ══════════════ -->
+<section class="section" id="sigma">
+  <div class="page-eyebrow">Schema · Sigma</div>
+  <div class="page-title">Sigma rule schema</div>
+  <div class="page-desc">YAML rules compiled at agent load to <code>CompiledMatcher</code> structs. Stateless: one event in, match-or-not out. The schema below is the <em>EDR-internal Sigma dialect</em> — strict subset of upstream Sigma's modifier list, augmented with EDR-specific fields (<code>auto_action</code>, <code>dedup_window_seconds</code>, etc.). Universal fields from the Overview page are required in addition to what's listed here.</p></div>
+
+  <h3>Sigma-specific required fields</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>event_type</td><td class="type">enum</td><td><span class="tag t-req">yes</span></td><td>Pre-filter. MUST match an entry in the <code>NormalizedEvent</code> enum (see Cross-cutting → NormalizedEvent). Rule never evaluates on other event types.</td></tr>
+    <tr><td>selection</td><td class="type">map | named-group</td><td><span class="tag t-req">yes</span></td><td>Positive condition. Either a single map (default <code>condition: selection</code>) or multiple <code>selection_*</code> blocks combined via the <code>condition</code> field.</td></tr>
+    <tr><td>filter</td><td class="type">map</td><td><span class="tag t-opt">opt</span></td><td>Known-good carve-out. If filter matches, alert is suppressed even when selection matched.</td></tr>
+    <tr><td>condition</td><td class="type">string</td><td><span class="tag t-opt">opt</span></td><td>Required only when multiple <code>selection_*</code> blocks exist. Examples: <code>1 of selection_*</code>, <code>selection or selection_combo</code>.</td></tr>
+  </table>
+
+  <h3>Allowed event types</h3>
+  <p>These map 1:1 to the agent's <code>NormalizedEvent::event_type</code> enum. Any other value fails CI.</p>
+  <table class="dt">
+    <tr><th>event_type</th><th>Common fields available</th></tr>
+    <tr><td>ProcessStart</td><td>process_name, image_path, command_line, parent_name, parent_image_path, parent_command_line, integrity_level, image_signed, image_signer, user_name</td></tr>
+    <tr><td>ProcessStop</td><td>process_name, image_path, exit_code, pid</td></tr>
+    <tr><td>FileCreate</td><td>process_name, image_path, target_path, target_extension, file_action</td></tr>
+    <tr><td>FileClose</td><td>process_name, image_path, target_path, target_extension, file_action, file_size</td></tr>
+    <tr><td>RegSet</td><td>process_name, image_path, reg_key, reg_value_name, reg_value_type, reg_value_data</td></tr>
+    <tr><td>RegDelete</td><td>process_name, image_path, reg_key, reg_value_name</td></tr>
+    <tr><td>NetConnect</td><td>process_name, image_path, protocol, direction, src_ip, src_port, dst_ip, dst_port, dst_hostname, owning_pid</td></tr>
+    <tr><td>DnsQuery</td><td>process_name, image_path, query_name, query_type, query_length, query_entropy, response_ips, rcode</td></tr>
+    <tr><td>ImageLoad</td><td>process_name, image_path, module_path, module_size, image_signed, image_signer</td></tr>
+  </table>
+
+  <h3>Allowed modifiers (the entire list — anything else fails CI)</h3>
+  <table class="dt">
+    <tr><th>Modifier</th><th>Behaviour</th><th>Example</th></tr>
+    <tr><td>|exact</td><td>Exact string match (default if no modifier)</td><td><code>process_name|exact: 'powershell.exe'</code></td></tr>
+    <tr><td>|contains</td><td>Substring search</td><td><code>command_line|contains: 'invoke-mimikatz'</code></td></tr>
+    <tr><td>|startswith</td><td>String starts with</td><td><code>image_path|startswith: 'c:\\users\\'</code></td></tr>
+    <tr><td>|endswith</td><td>String ends with — preferred for paths/binaries</td><td><code>process_name|endswith: '\\cmd.exe'</code></td></tr>
+    <tr><td>|re</td><td>Regex match (Rust regex crate, no PCRE backtracking)</td><td><code>command_line|re: '[A-Za-z0-9+/]{500,}'</code></td></tr>
+    <tr><td>|gte / |lte</td><td>Numeric ≥ / ≤</td><td><code>query_entropy|gte: 4.0</code></td></tr>
+    <tr><td>|gt / |lt</td><td>Numeric &gt; / &lt;</td><td><code>file_size|lt: 1024</code></td></tr>
+    <tr><td>|<em>any</em>X|any</td><td>List-match — any element matches</td><td><code>process_name|endswith|any: ['\\cmd.exe', '\\powershell.exe']</code></td></tr>
+    <tr><td>|<em>any</em>X|all</td><td>List-match — all elements must match</td><td><code>command_line|contains|all: ['mimikatz', 'sekurlsa']</code></td></tr>
+  </table>
+
+  <div class="note warn">All string literals must be lowercase. The agent normalizes string fields to lowercase at the boundary (EX-B-001 in existing changes). A mixed-case literal will silently never match. CI lints for this.</div>
+
+  <h3>Canonical example</h3>
+  <div class="code-block">
+    <div class="code-label"><span>R-001 — full schema example</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">id:</span> R-001
+<span class="kw">title:</span> Office application spawns command shell
+<span class="kw">status:</span> stable
+<span class="kw">description:</span> &gt;
+  Detects Microsoft Office applications spawning command interpreters.
+  Strong indicator of macro execution or DDE abuse.
+<span class="kw">references:</span>
+  - https://attack.mitre.org/techniques/T1059/001/
+<span class="kw">author:</span> SOC-1
+<span class="kw">date:</span> 2026-05-06
+<span class="kw">severity:</span> <span class="str">critical</span>
+<span class="kw">mitre:</span>
+  <span class="kw">primary:</span>
+    <span class="kw">tactic_id:</span> TA0002
+    <span class="kw">tactic:</span> <span class="str">"execution"</span>
+    <span class="kw">technique_id:</span> T1059.001
+    <span class="kw">technique:</span> <span class="str">"PowerShell"</span>
+  <span class="kw">secondary:</span>
+    - <span class="kw">tactic_id:</span> TA0001
+      <span class="kw">tactic:</span> <span class="str">"initial-access"</span>
+      <span class="kw">technique_id:</span> T1566.001
+      <span class="kw">technique:</span> <span class="str">"Spearphishing Attachment"</span>
+
+<span class="kw">event_type:</span> <span class="ty">ProcessStart</span>          <span class="cmt"># pre-filter</span>
+
+<span class="kw">selection:</span>                       <span class="cmt"># positive — all keys ANDed</span>
+  <span class="kw">parent_name|endswith|any:</span>
+    - <span class="str">'\winword.exe'</span>
+    - <span class="str">'\excel.exe'</span>
+    - <span class="str">'\outlook.exe'</span>
+  <span class="kw">process_name|endswith|any:</span>
+    - <span class="str">'\cmd.exe'</span>
+    - <span class="str">'\powershell.exe'</span>
+    - <span class="str">'\wscript.exe'</span>
+
+<span class="kw">filter:</span>                          <span class="cmt"># negative — known-good carve-outs</span>
+  <span class="kw">parent_image_path|contains:</span>
+    <span class="str">'\microsoft office\office16\msoia.exe'</span>
+
+<span class="kw">dedup_window_seconds:</span> <span class="num">300</span>
+<span class="kw">auto_action:</span> <span class="str">suspend_process</span>      <span class="cmt"># OK — severity=critical</span>
+
+<span class="kw">tags:</span> [macro, phishing, initial_access]</pre>
+  </div>
+
+  <h3>Boolean semantics — exactly what gets evaluated</h3>
+  <pre><span class="cmt"># Within a selection block:</span>
+selection:
+  field_a: x         <span class="cmt"># field_a == x  AND</span>
+  field_b: y         <span class="cmt"># field_b == y  AND</span>
+  field_c|any: [...] <span class="cmt"># field_c in list (any-of)</span>
+                     <span class="cmt"># Everything in the block is ANDed.</span>
+
+<span class="cmt"># With multiple selection_* blocks:</span>
+selection_a: { ... }
+selection_b: { ... }
+condition: 1 of selection_*    <span class="cmt"># OR  (default if condition omitted)</span>
+condition: all of selection_*  <span class="cmt"># AND</span>
+condition: selection_a or selection_b  <span class="cmt"># explicit boolean</span>
+
+<span class="cmt"># Filter is evaluated AFTER selection.
+# If filter matches, the rule is suppressed.</span>
+filter:
+  field_a: known_good   <span class="cmt"># suppress when this matches</span></pre>
+
+  <h3>What CI rejects (not exhaustive)</h3>
+  <table class="dt">
+    <tr><th>Reject reason</th><th>Why</th></tr>
+    <tr><td>Missing universal field</td><td>Every rule needs id, severity, mitre, author, date, status</td></tr>
+    <tr><td><code>auto_action</code> set with severity != critical</td><td>Auto-actions only on Critical — design rule</td></tr>
+    <tr><td>Modifier outside the allowed list</td><td>Avoids unknown-modifier silent failures</td></tr>
+    <tr><td>Mixed-case string literal</td><td>Will silently never match — agent normalizes lowercase</td></tr>
+    <tr><td>Reference to a field absent on declared <code>event_type</code></td><td>e.g. <code>dst_ip</code> on a ProcessStart rule</td></tr>
+    <tr><td>Regex without anchors and longer than 1024 chars</td><td>Catastrophic backtracking risk</td></tr>
+    <tr><td>Empty <code>selection</code></td><td>Would match every event — never the intent</td></tr>
+    <tr><td>Path under <code>stable/</code> but <code>status: experimental</code></td><td>Path and status must agree</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ YARA SCHEMA ══════════════ -->
+<section class="section" id="yara">
+  <div class="page-eyebrow">Schema · YARA</div>
+  <div class="page-title">YARA rule schema</div>
+  <div class="page-desc">Standard YARA language constrained to the yara-x runtime's feature set, with a required <code>meta</code> block whose keys are checked by CI. Authors write <code>.yar</code> source; the build pipeline compiles each file with <code>yarac</code> into a single packed <code>.yrc</code> bundle which the agent mmaps.</div>
+
+  <h3>Meta block — required keys</h3>
+  <p>YARA's meta block is conventionally free-form. Our CI requires the keys below — this is what makes the meta block parseable into the AlertRecord without per-rule special cases.</p>
+  <table class="dt">
+    <tr><th>Meta key</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>id</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>Format <code>Y-NNN</code>. Same value as filename prefix.</td></tr>
+    <tr><td>family</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>Malware family or technique class. Camel/PascalCase.</td></tr>
+    <tr><td>description</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>What it detects, briefly.</td></tr>
+    <tr><td>author</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>Same enforcement as Sigma.</td></tr>
+    <tr><td>date</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>YYYY-MM-DD.</td></tr>
+    <tr><td>severity</td><td class="type">enum</td><td><span class="tag t-req">yes</span></td><td><code>critical</code> · <code>high</code> · <code>medium</code> · <code>low</code>.</td></tr>
+    <tr><td>mitre</td><td class="type">string</td><td><span class="tag t-req">yes</span></td><td>Comma-separated technique IDs in a single string (YARA meta values must be scalar).</td></tr>
+    <tr><td>reference</td><td class="type">string</td><td><span class="tag t-opt">opt</span></td><td>URL.</td></tr>
+  </table>
+
+  <h3>Rule identifier convention</h3>
+  <p>YARA identifiers cannot contain hyphens. Rule names follow <code>Y_NNN_FamilyName</code> (underscores). Filename uses hyphens: <code>Y-NNN_lowercase_family.yar</code>.</p>
+
+  <h3>Required structural anchors</h3>
+  <p>Every rule must include at least ONE of the structural anchors below in its condition. Pure-string rules without anchors are rejected by CI. Anchors keep scan time bounded and make rules robust against false positives on unrelated file types.</p>
+  <table class="dt">
+    <tr><th>Anchor</th><th>Purpose</th></tr>
+    <tr><td><code>uint16(0) == 0x5A4D</code></td><td>PE file (MZ header). Use for any rule targeting Windows binaries.</td></tr>
+    <tr><td><code>uint32(0) == 0x464c457f</code></td><td>ELF file. Use for Linux samples (when relevant).</td></tr>
+    <tr><td><code>filesize &lt; N</code></td><td>Hard cap. <strong>Required on every rule.</strong> Prevents pathological large-file scans.</td></tr>
+    <tr><td><code>filesize &gt; M</code></td><td>Lower bound. Use to skip stub files / dropper shells.</td></tr>
+  </table>
+
+  <h3>Allowed yara-x features</h3>
+  <table class="dt">
+    <tr><th>Feature</th><th>Allowed</th><th>Notes</th></tr>
+    <tr><td>ascii / wide / nocase string modifiers</td><td>✓</td><td>Standard usage.</td></tr>
+    <tr><td>Hex byte patterns with wildcards</td><td>✓</td><td><code>{ 8B 45 ?? 33 ?? }</code></td></tr>
+    <tr><td>Regex strings</td><td>✓</td><td>Bounded — &lt;200 chars per pattern.</td></tr>
+    <tr><td><code>math.entropy()</code></td><td>✓</td><td>For packer / encryption detection. Use sparingly — cost is per-scan, not per-rule.</td></tr>
+    <tr><td><code>pe</code> module (imports / exports / sections)</td><td>✓</td><td>Use for header-based pivots.</td></tr>
+    <tr><td><code>2 of</code>, <code>3 of</code>, <code>any of</code>, <code>all of</code></td><td>✓</td><td>Combinator conditions — <strong>required</strong>. See below.</td></tr>
+    <tr><td><code>cuckoo</code> module</td><td>✗</td><td>Sandbox-only, not on agent.</td></tr>
+    <tr><td><code>elf</code>, <code>magic</code> modules</td><td>case-by-case</td><td>Off by default in yara-x. Confirm with engineering before use.</td></tr>
+  </table>
+
+  <h3>Combination requirement</h3>
+  <p>Single-string rules (<code>condition: $a</code>) are rejected by CI. Every condition must combine at least two indicators OR pair one strong indicator with a structural anchor. This is the difference between a rule that fires on every README mentioning PowerShell and a rule that fires on actual malware.</p>
+  <table class="dt">
+    <tr><th>Acceptable</th><th>Why</th></tr>
+    <tr><td><code>2 of ($brand_*)</code></td><td>Two distinct family-marker strings — robust against incidental matches.</td></tr>
+    <tr><td><code>$marker and 2 of ($cfg_*)</code></td><td>Brand string + configuration markers — high specificity.</td></tr>
+    <tr><td><code>$loader_prologue and ($api_a or $api_b)</code></td><td>Code shape + API indicator.</td></tr>
+    <tr><td><code>$rare_pdb_string</code></td><td>Single string acceptable IF the string is uniquely diagnostic (PDB path with developer username, banner). Justify in description.</td></tr>
+  </table>
+
+  <h3>Canonical example</h3>
+  <div class="code-block">
+    <div class="code-label"><span>Y-002 — full schema example</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="cmt">/*
+ * Y-002  Mimikatz
+ *
+ * Detects Mimikatz binaries by command strings, banners, and
+ * privilege-escalation flags. Strings chosen to survive recompilation.
+ */</span>
+<span class="kw">rule</span> <span class="fn">Y_002_Mimikatz</span>
+{
+    <span class="kw">meta:</span>
+        <span class="kw">id</span>          = <span class="str">"Y-002"</span>
+        <span class="kw">family</span>      = <span class="str">"Mimikatz"</span>
+        <span class="kw">description</span> = <span class="str">"Mimikatz credential dumping tool"</span>
+        <span class="kw">author</span>      = <span class="str">"SOC-1"</span>
+        <span class="kw">date</span>        = <span class="str">"2026-05-06"</span>
+        <span class="kw">severity</span>    = <span class="str">"critical"</span>
+        <span class="kw">mitre</span>       = <span class="str">"T1003.001"</span>
+
+    <span class="kw">strings:</span>
+        $cmd_sekurlsa  = <span class="str">"sekurlsa::logonpasswords"</span> ascii wide
+        $cmd_lsadump   = <span class="str">"lsadump::sam"</span> ascii wide
+        $cmd_privilege = <span class="str">"privilege::debug"</span> ascii wide
+        $banner_a      = <span class="str">"gentilkiwi"</span> ascii wide
+        $banner_b      = <span class="str">"mimikatz"</span> ascii wide nocase
+
+    <span class="kw">condition:</span>
+        <span class="ty">uint16(0) == 0x5A4D</span>      <span class="cmt"># PE structural anchor</span>
+        <span class="kw">and</span> filesize &lt; 10MB        <span class="cmt"># mandatory cap</span>
+        <span class="kw">and</span> (
+              3 of ($cmd_*)
+              <span class="kw">or</span> (1 of ($banner_*) and 2 of ($cmd_*))
+            )
+}</pre>
+  </div>
+
+  <h3>What CI rejects</h3>
+  <table class="dt">
+    <tr><th>Reject reason</th><th>Why</th></tr>
+    <tr><td>Missing required meta key</td><td>Alert generation needs id/family/severity/mitre</td></tr>
+    <tr><td>No filesize cap in condition</td><td>One pathological input could stall the scanner</td></tr>
+    <tr><td>No structural anchor (<code>uint16(0)</code>, etc.)</td><td>Rule could fire on plaintext, JSON, log lines</td></tr>
+    <tr><td>Single-string condition without justification</td><td>Almost always over-fires</td></tr>
+    <tr><td>Use of disallowed module (<code>cuckoo</code>, etc.)</td><td>Won't compile under yara-x on agent</td></tr>
+    <tr><td>Compile failure under <code>yarac</code></td><td>Self-explanatory</td></tr>
+    <tr><td>Filename hyphens vs identifier underscores mismatch</td><td>Y-002 file → must contain rule <code>Y_002_*</code></td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ BEHAVIORAL SCHEMA ══════════════ -->
+<section class="section" id="behavioral">
+  <div class="page-eyebrow">Schema · Behavioral</div>
+  <div class="page-title">Behavioral rule schema</div>
+  <div class="page-desc">Stateful detection: chain patterns across multiple events, sliding-window counters per PID, sibling bursts under one parent. Authored as YAML, compiled at build time to MessagePack for compact runtime parsing.</div>
+
+  <h3>Three rule types under one schema</h3>
+  <table class="dt">
+    <tr><th>type</th><th>What it does</th><th>Example</th></tr>
+    <tr><td>chain</td><td>Sequence of events matching ordered stages within a window</td><td>CP-001: Office → shell → download</td></tr>
+    <tr><td>sibling_burst</td><td>N distinct processes from same parent within window</td><td>CP-002: 3 recon tools in 30s</td></tr>
+    <tr><td>counter</td><td>Per-PID sliding-window thresholds on event rates / sums</td><td>B-RANSOM-001: write-rate + new-extension count</td></tr>
+  </table>
+
+  <h3>Common required fields (in addition to universal)</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>type</td><td class="type">enum</td><td><span class="tag t-req">yes</span></td><td><code>chain</code> · <code>sibling_burst</code> · <code>counter</code>. Determines which other fields are required below.</td></tr>
+    <tr><td>window_seconds</td><td class="type">int</td><td><span class="tag t-req">yes</span></td><td>Rolling time window in seconds. No defaults — must be explicit.</td></tr>
+    <tr><td>filter</td><td class="type">map</td><td><span class="tag t-opt">opt</span></td><td>Same semantics as Sigma. Counter rules effectively require this — rate-based detection without a filter floods on dev tooling.</td></tr>
+    <tr><td>enabled</td><td class="type">bool</td><td><span class="tag t-opt">opt</span></td><td>Default <code>true</code>. Set false to ship the rule but not evaluate (e.g. waiting on a provider — see B-INJECT-001).</td></tr>
+  </table>
+
+  <h3>type=chain — additional fields</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>stages</td><td class="type">[Stage]</td><td><span class="tag t-req">yes</span></td><td>Ordered list. All non-optional stages must occur in order within window.</td></tr>
+  </table>
+  <p>Each <code>Stage</code> entry has:</p>
+  <table class="dt">
+    <tr><th>Stage field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>name</td><td class="type">string</td><td>Local identifier — used by later stages via <code>parent_match</code> / <code>matches_capture</code>.</td></tr>
+    <tr><td>event_type</td><td class="type">enum</td><td>Optional. Defaults to <code>ProcessStart</code>.</td></tr>
+    <tr><td>parent_match</td><td class="type">string</td><td>Reference to a previous stage's <code>name</code>. The current event's parent (or owning_pid) must match a process previously matched by that stage.</td></tr>
+    <tr><td>capture</td><td class="type">string</td><td>Field name from this stage's matched event to remember for later stages (e.g. <code>reg_value_data</code>).</td></tr>
+    <tr><td>matches_capture</td><td class="type">string</td><td><code>StageName.field</code>. Current event's named field must equal the captured value.</td></tr>
+    <tr><td>timestamp_within_seconds</td><td class="type">int</td><td>Tighter per-stage window (overrides rule-level <code>window_seconds</code>).</td></tr>
+    <tr><td>optional</td><td class="type">bool</td><td>Default false. If true, chain still fires when this stage is absent.</td></tr>
+    <tr><td>{any field}|{modifier}</td><td>—</td><td>Same matchers as Sigma — full modifier list applies.</td></tr>
+  </table>
+
+  <h3>type=sibling_burst — additional fields</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>threshold_distinct</td><td class="type">int</td><td><span class="tag t-req">yes</span></td><td>How many DISTINCT child <code>process_name</code> values must occur from one parent inside the window.</td></tr>
+    <tr><td>watch_processes</td><td class="type">map</td><td><span class="tag t-req">yes</span></td><td>Selection block matching the children to count. Same syntax as Sigma selection.</td></tr>
+  </table>
+
+  <h3>type=counter — additional fields</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>per_pid_counters</td><td class="type">[Counter]</td><td>one of</td><td>Counters keyed by source PID.</td></tr>
+    <tr><td>per_parent_counters</td><td class="type">[Counter]</td><td>one of</td><td>Counters keyed by parent PID. Use for spawn-rate detection.</td></tr>
+    <tr><td>condition</td><td class="type">expr</td><td><span class="tag t-req">yes</span></td><td>Boolean expression over counter values. See below.</td></tr>
+  </table>
+  <p>Each <code>Counter</code>:</p>
+  <table class="dt">
+    <tr><th>Counter field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>name</td><td class="type">string</td><td>Referenced from <code>condition</code>.</td></tr>
+    <tr><td>key</td><td class="type">expr</td><td>Optional override of default key. e.g. <code>(pid, dst_ip)</code> for beacon detection.</td></tr>
+    <tr><td>increment_on</td><td class="type">filter-expr</td><td>Pseudo-DSL: <code>FileClose where file_action in [Created, Modified]</code>.</td></tr>
+    <tr><td>track_distinct</td><td class="type">field</td><td>Counts distinct values of the field instead of total events.</td></tr>
+    <tr><td>sum_field</td><td class="type">field</td><td>Sums numeric field instead of counting events. Used for byte-volume.</td></tr>
+    <tr><td>window_seconds</td><td class="type">int</td><td>Per-counter window. Overrides rule-level if both set.</td></tr>
+  </table>
+  <p>Counter <code>condition</code> supports: <code>name.count</code>, <code>name.sum</code>, <code>name.distinct_count</code>, <code>name.rate_per_sec</code>, <code>name.inter_arrival_stddev_ms</code>, plus <code>all_of</code> / <code>any_of</code> blocks and standard comparison operators.</p>
+
+  <h3>Canonical example — chain</h3>
+  <div class="code-block">
+    <div class="code-label"><span>CP-001 — chain rule</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">id:</span> CP-001
+<span class="kw">title:</span> Office macro to shell to download chain
+<span class="kw">status:</span> stable
+<span class="kw">type:</span> <span class="ty">chain</span>
+<span class="kw">severity:</span> <span class="str">critical</span>
+<span class="kw">mitre:</span>
+  <span class="kw">primary:</span>
+    <span class="kw">tactic_id:</span> TA0002
+    <span class="kw">tactic:</span> <span class="str">"execution"</span>
+    <span class="kw">technique_id:</span> T1059.001
+    <span class="kw">technique:</span> <span class="str">"PowerShell"</span>
+  <span class="kw">secondary:</span>
+    - <span class="kw">tactic_id:</span> TA0001
+      <span class="kw">tactic:</span> <span class="str">"initial-access"</span>
+      <span class="kw">technique_id:</span> T1566.001
+      <span class="kw">technique:</span> <span class="str">"Spearphishing Attachment"</span>
+    - <span class="kw">tactic_id:</span> TA0011
+      <span class="kw">tactic:</span> <span class="str">"command-and-control"</span>
+      <span class="kw">technique_id:</span> T1105
+      <span class="kw">technique:</span> <span class="str">"Ingress Tool Transfer"</span>
+<span class="kw">window_seconds:</span> <span class="num">30</span>
+<span class="kw">auto_action:</span> <span class="str">suspend_process</span>
+
+<span class="kw">stages:</span>
+  - <span class="kw">name:</span> stage_office
+    <span class="kw">process_name|endswith|any:</span>
+      - <span class="str">'\winword.exe'</span>
+      - <span class="str">'\excel.exe'</span>
+
+  - <span class="kw">name:</span> stage_shell
+    <span class="kw">parent_match:</span> stage_office
+    <span class="kw">process_name|endswith|any:</span>
+      - <span class="str">'\cmd.exe'</span>
+      - <span class="str">'\powershell.exe'</span>
+
+  - <span class="kw">name:</span> stage_download
+    <span class="kw">parent_match:</span> stage_shell
+    <span class="kw">process_name|endswith|any:</span>
+      - <span class="str">'\certutil.exe'</span>
+      - <span class="str">'\bitsadmin.exe'</span>
+
+<span class="kw">dedup_window_seconds:</span> <span class="num">300</span></pre>
+  </div>
+
+  <h3>Canonical example — counter</h3>
+  <div class="code-block">
+    <div class="code-label"><span>B-RANSOM-001 — counter rule</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">id:</span> B-RANSOM-001
+<span class="kw">title:</span> Ransomware file-write rate and new-extension burst
+<span class="kw">status:</span> stable
+<span class="kw">type:</span> <span class="ty">counter</span>
+<span class="kw">severity:</span> <span class="str">critical</span>
+<span class="kw">mitre:</span> [T1486]
+<span class="kw">window_seconds:</span> <span class="num">30</span>
+<span class="kw">auto_action:</span> <span class="str">suspend_process</span>
+
+<span class="kw">per_pid_counters:</span>
+  - <span class="kw">name:</span> file_writes
+    <span class="kw">increment_on:</span> <span class="str">FileClose where file_action in [Created, Modified]</span>
+    <span class="kw">window_seconds:</span> <span class="num">10</span>
+
+  - <span class="kw">name:</span> new_extensions
+    <span class="kw">increment_on:</span> <span class="str">FileClose where file_action in [Created, Renamed]</span>
+    <span class="kw">track_distinct:</span> target_extension
+    <span class="kw">window_seconds:</span> <span class="num">30</span>
+
+<span class="kw">condition:</span>
+  <span class="kw">all_of:</span>
+    - file_writes.rate_per_sec &gt;= <span class="num">20</span>
+    - new_extensions.distinct_count &gt;= <span class="num">5</span>
+
+<span class="kw">filter:</span>
+  <span class="kw">process_name|endswith|any:</span>
+    - <span class="str">'\7z.exe'</span>
+    - <span class="str">'\winrar.exe'</span>
+    - <span class="str">'\msbuild.exe'</span>
+    - <span class="str">'\git.exe'</span></pre>
+  </div>
+
+  <h3>What CI rejects</h3>
+  <table class="dt">
+    <tr><th>Reject reason</th><th>Why</th></tr>
+    <tr><td>type=counter without filter block</td><td>Rate rules without filters flood on build systems / dev tooling</td></tr>
+    <tr><td>type=chain with single stage</td><td>That's a Sigma rule — write it as one</td></tr>
+    <tr><td>parent_match referring to an undefined stage</td><td>Compile error</td></tr>
+    <tr><td>matches_capture referring to a non-captured field</td><td>Compile error</td></tr>
+    <tr><td>Missing window_seconds</td><td>No implicit windows allowed — must be explicit</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ SIGNATURE SCHEMA ══════════════ -->
+<section class="section" id="signature">
+  <div class="page-eyebrow">Schema · Signatures</div>
+  <div class="page-title">Hash signature schema</div>
+  <div class="page-desc">Three artifacts: the source feeds config (where hashes come from), the server-side hashes table (single source of truth), and the agent-side Bloom filter (compact membership test). Each agent gets a Bloom — never raw hashes. The cloud-lookup verdict structure is the response shape for Bloom hits.</div>
+
+  <h3>Architecture recap</h3>
+  <pre>SOURCE FEEDS  ──nightly pull──&gt;  server hashes table  ──nightly build──&gt;  *.bloom (~1.2MB)
+   (TOML)                          (Postgres / OpenSearch)                   ──&gt;  agent
+
+AGENT FileClose  ──hash──&gt;  bloom.contains(sha256)?
+                                NO  → done (99% of files, no network)
+                                YES → cloud_lookup(sha256) → Verdict
+                                          Malicious  → quarantine + alert
+                                          Clean      → cache, do nothing
+                                          Unknown    → cache TTL, no alert</pre>
+
+  <h3>1. <code>feeds.toml</code> — source-feed configuration</h3>
+  <p>Server-side. Lists the upstream sources that feed the hashes table. SOC-1 edits this; the nightly cron reads it.</p>
+  <div class="code-block">
+    <div class="code-label"><span>signatures/feeds.toml</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="cmt"># Hash-feed sources for the EDR signature DB.
+# Read by server/feeds/*.py at nightly cron.</span>
+
+<span class="kw">[[feed]]</span>
+<span class="kw">name</span>       = <span class="str">"malware_bazaar"</span>
+<span class="kw">enabled</span>    = <span class="num">true</span>
+<span class="kw">url</span>        = <span class="str">"https://mb-api.abuse.ch/api/v1/"</span>
+<span class="kw">format</span>     = <span class="str">"malshare_json"</span>
+<span class="kw">hash_type</span>  = <span class="str">"sha256"</span>
+<span class="kw">interval</span>   = <span class="str">"24h"</span>
+<span class="kw">tags</span>       = [<span class="str">"public"</span>, <span class="str">"family-tagged"</span>]
+
+<span class="kw">[[feed]]</span>
+<span class="kw">name</span>       = <span class="str">"cisa_known_bad"</span>
+<span class="kw">enabled</span>    = <span class="num">true</span>
+<span class="kw">url</span>        = <span class="str">"https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.csv"</span>
+<span class="kw">format</span>     = <span class="str">"csv"</span>
+<span class="kw">hash_field</span> = <span class="str">"sha256"</span>
+<span class="kw">interval</span>   = <span class="str">"24h"</span>
+
+<span class="kw">[[feed]]</span>
+<span class="kw">name</span>       = <span class="str">"internal_sandbox"</span>
+<span class="kw">enabled</span>    = <span class="num">true</span>
+<span class="kw">source</span>     = <span class="str">"db://internal/sandbox_verdicts"</span>
+<span class="kw">interval</span>   = <span class="str">"1h"</span>
+<span class="kw">trust_level</span> = <span class="str">"high"</span>     <span class="cmt"># internal verdicts trump public feeds on conflict</span>
+
+<span class="kw">[bloom]</span>
+<span class="kw">target_fp_rate</span>     = <span class="num">0.0001</span>      <span class="cmt"># 1 in 10000 — agent acceptable</span>
+<span class="kw">capacity_overhead</span>  = <span class="num">1.2</span>         <span class="cmt"># size for 1.2× current count (room to grow)</span>
+<span class="kw">rebuild_schedule</span>   = <span class="str">"02:00 UTC"</span>
+<span class="kw">retain_versions</span>    = <span class="num">7</span>           <span class="cmt"># keep 7 days for rollback</span></pre>
+  </div>
+
+  <h3>2. Server-side hashes table</h3>
+  <p>Authoritative store. Either a Postgres table or an OpenSearch index — pick based on your infra, schema is the same.</p>
+  <table class="dt">
+    <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>sha256</td><td class="type">char(64)</td><td>Primary key. Lowercase hex.</td></tr>
+    <tr><td>md5</td><td class="type">char(32)</td><td>Optional secondary. Some feeds only ship md5.</td></tr>
+    <tr><td>imphash</td><td class="type">char(32)</td><td>PE import hash. Useful for family clustering.</td></tr>
+    <tr><td>verdict</td><td class="type">enum</td><td><code>malicious</code> · <code>suspicious</code> · <code>clean</code> · <code>unknown</code>. Default <code>malicious</code> for blocklist-style feeds.</td></tr>
+    <tr><td>family</td><td class="type">string</td><td>Malware family if known (e.g. <code>LockBit</code>, <code>RedLine</code>).</td></tr>
+    <tr><td>type</td><td class="type">string</td><td>File type tag — <code>pe</code>, <code>elf</code>, <code>doc</code>, <code>script</code>.</td></tr>
+    <tr><td>source</td><td class="type">string</td><td>Feed name from <code>feeds.toml</code>. Used to weight verdicts on conflict.</td></tr>
+    <tr><td>first_seen</td><td class="type">timestamp</td><td>When this hash first appeared in any feed.</td></tr>
+    <tr><td>last_seen</td><td class="type">timestamp</td><td>Last time any feed reported it. Influences eviction.</td></tr>
+    <tr><td>tags</td><td class="type">[string]</td><td>Free-form. e.g. <code>apt</code>, <code>commodity</code>, <code>destructive</code>.</td></tr>
+  </table>
+
+  <h3>3. Agent-side <code>.bloom</code> file format</h3>
+  <p>Compact, mmap-friendly binary file. The agent never parses it as data — it mmaps and indexes.</p>
+  <div class="code-block">
+    <div class="code-label"><span>bloom file layout</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="cmt">// File: malshare.bloom (or whatever feed name)
+// All values little-endian.</span>
+
+<span class="kw">struct</span> <span class="ty">BloomFile</span> {
+    magic:           [u8; <span class="num">4</span>],     <span class="cmt">// "EDRB"</span>
+    format_version:  u16,           <span class="cmt">// 1</span>
+    hash_count:      u8,            <span class="cmt">// k — number of hash funcs (typ 7)</span>
+    reserved:        u8,
+    n_items:         u64,           <span class="cmt">// approximate count of hashes</span>
+    bit_count:       u64,           <span class="cmt">// m — size of bit array in bits</span>
+    fp_rate_x1e6:    u32,           <span class="cmt">// FP rate × 1,000,000 (e.g. 100 = 0.0001)</span>
+    built_at_utc:    u64,           <span class="cmt">// Unix epoch seconds</span>
+    feed_name_len:   u16,
+    feed_name:       [u8; <span class="ty">feed_name_len</span>],
+    bit_array:       [u8; <span class="ty">ceil(bit_count / 8)</span>],
+    sha256_self:     [u8; <span class="num">32</span>],    <span class="cmt">// hash of all preceding bytes</span>
+    signature:       [u8; <span class="num">64</span>],    <span class="cmt">// Ed25519 sig over sha256_self</span>
+}</pre>
+  </div>
+  <p>Why signed: an attacker who can replace <code>active\signatures\malshare.bloom</code> on disk could blank it out (silencing detection) or stuff it (causing storm of false-positive cloud lookups). Ed25519 sig with the public key embedded in the agent binary at compile time stops both.</p>
+
+  <h3>4. Verdict response (cloud lookup)</h3>
+  <p>What the cloud-lookup gRPC returns when an agent sees a Bloom HIT and asks the server.</p>
+  <div class="code-block">
+    <div class="code-label"><span>VerdictLookup gRPC response</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">message</span> <span class="ty">VerdictResponse</span> {
+    <span class="ty">string</span> sha256       = <span class="num">1</span>;       <span class="cmt">// echoes the request</span>
+    <span class="ty">Verdict</span> verdict     = <span class="num">2</span>;
+    <span class="ty">string</span> family       = <span class="num">3</span>;       <span class="cmt">// "" if unknown</span>
+    <span class="ty">string</span> first_seen   = <span class="num">4</span>;       <span class="cmt">// ISO 8601, "" if unknown</span>
+    <span class="ty">int32</span>  ttl_seconds  = <span class="num">5</span>;       <span class="cmt">// agent caches result for this long</span>
+    <span class="ty">repeated string</span> tags = <span class="num">6</span>;       <span class="cmt">// free-form</span>
+}
+
+<span class="kw">enum</span> <span class="ty">Verdict</span> {
+    UNKNOWN     = <span class="num">0</span>;          <span class="cmt">// Bloom FP, or genuinely unknown — short TTL (60s)</span>
+    CLEAN       = <span class="num">1</span>;          <span class="cmt">// allowlist hit — long TTL (24h)</span>
+    SUSPICIOUS  = <span class="num">2</span>;          <span class="cmt">// alert but no auto-quarantine</span>
+    MALICIOUS   = <span class="num">3</span>;          <span class="cmt">// alert + quarantine + suspend chain</span>
+}</pre>
+  </div>
+
+  <h3>5. Allowlist (separate from blocklist)</h3>
+  <p>Known-good hashes shipped as a separate Bloom — <code>allowlist.bloom</code>. Same file format. Used to suppress alerts on hashes that DO match a YARA rule (false positive in YARA) but are known-clean. Lookup order on FileClose:</p>
+  <pre>1. Compute sha256
+2. allowlist.bloom.contains(sha256)?  YES → skip ALL engines for this file
+3. blocklist.bloom.contains(sha256)?  YES → cloud lookup → quarantine on Malicious
+4. Run YARA scan
+5. Run other engines normally</pre>
+
+  <div class="note ok">The allowlist Bloom can run at higher FP rate (0.001 = 1 in 1000) without impact — a false-positive on the allowlist just means we skipped a good file's scan, which is acceptable. Blocklist must stay tight (0.0001) because every FP costs a cloud round-trip.</div>
+</section>
+
+<!-- ══════════════ ML SCHEMA ══════════════ -->
+<section class="section" id="ml">
+  <div class="page-eyebrow">Schema · ML Models</div>
+  <div class="page-title">ML model schema</div>
+  <div class="page-desc">ONNX models distributed alongside a feature spec and threshold config. The ML team owns model design; this schema defines the contract between their training pipeline and the agent's inference runtime so models can be swapped without agent code changes.</div>
+
+  <h3>Three artifacts per model</h3>
+  <table class="dt">
+    <tr><th>Artifact</th><th>Owner</th><th>Purpose</th></tr>
+    <tr><td><code>&lt;model_id&gt;.onnx</code></td><td>ML team</td><td>The trained model. INT8-quantized for size + agent CPU.</td></tr>
+    <tr><td><code>&lt;model_id&gt;.feature_spec.json</code></td><td>ML team + DEV-1</td><td>How to build the input tensor from a NormalizedEvent. Must produce identical features in Python (training) and Rust (inference).</td></tr>
+    <tr><td><code>&lt;model_id&gt;.config.yml</code></td><td>SOC-1</td><td>Per-tenant thresholds + enable flag. Decoupled so SOC can tune without retraining.</td></tr>
+  </table>
+
+  <h3>Model registration in bundle manifest</h3>
+  <div class="code-block">
+    <div class="code-label"><span>manifest entry per model</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre>{
+  <span class="kw">"rule_id"</span>:      <span class="str">"ml.process_anomaly"</span>,
+  <span class="kw">"type"</span>:         <span class="str">"ml_model"</span>,
+  <span class="kw">"model_id"</span>:     <span class="str">"ML-001"</span>,
+  <span class="kw">"content_hash"</span>: <span class="str">"sha256:..."</span>,    <span class="cmt">// hash of .onnx file</span>
+  <span class="kw">"feature_spec_hash"</span>: <span class="str">"sha256:..."</span>,
+  <span class="kw">"feature_version"</span>:   <span class="num">3</span>,           <span class="cmt">// bumped on schema change</span>
+  <span class="kw">"applies_to_event_types"</span>: [<span class="str">"ProcessStart"</span>],
+  <span class="kw">"output_shape"</span>:    [<span class="num">1</span>],          <span class="cmt">// scalar score</span>
+  <span class="kw">"output_meaning"</span>:  <span class="str">"anomaly_probability"</span>,
+  <span class="kw">"size_bytes"</span>:      <span class="num">2087936</span>,      <span class="cmt">// ~2 MB</span>
+  <span class="kw">"status"</span>:          <span class="str">"stable"</span>,
+  <span class="kw">"version"</span>:         <span class="num">14</span>
+}</pre>
+  </div>
+
+  <h3>Feature spec — the agent/training contract</h3>
+  <div class="code-block">
+    <div class="code-label"><span>ML-001.feature_spec.json</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre>{
+  <span class="kw">"model_id"</span>:        <span class="str">"ML-001"</span>,
+  <span class="kw">"feature_version"</span>: <span class="num">3</span>,
+  <span class="kw">"input_event"</span>:     <span class="str">"ProcessStart"</span>,
+  <span class="kw">"input_tensor_shape"</span>: [<span class="num">1</span>, <span class="num">128</span>],
+  <span class="kw">"input_tensor_dtype"</span>: <span class="str">"float32"</span>,
+
+  <span class="kw">"features"</span>: [
+    {
+      <span class="kw">"index"</span>: <span class="num">0</span>,
+      <span class="kw">"name"</span>:  <span class="str">"cmdline_length"</span>,
+      <span class="kw">"source"</span>: <span class="str">"event.command_line"</span>,
+      <span class="kw">"transform"</span>: <span class="str">"len_then_log1p"</span>,
+      <span class="kw">"clip"</span>: [<span class="num">0</span>, <span class="num">12</span>]
+    },
+    {
+      <span class="kw">"index"</span>: <span class="num">1</span>,
+      <span class="kw">"name"</span>:  <span class="str">"cmdline_entropy"</span>,
+      <span class="kw">"source"</span>: <span class="str">"event.command_line"</span>,
+      <span class="kw">"transform"</span>: <span class="str">"shannon_entropy"</span>,
+      <span class="kw">"clip"</span>: [<span class="num">0.0</span>, <span class="num">8.0</span>]
+    },
+    {
+      <span class="kw">"index"</span>: <span class="num">2</span>,
+      <span class="kw">"name"</span>:  <span class="str">"process_name_hash_bucket"</span>,
+      <span class="kw">"source"</span>: <span class="str">"event.process_name"</span>,
+      <span class="kw">"transform"</span>: <span class="str">"murmurhash3_mod_64"</span>
+    },
+    {
+      <span class="kw">"index"</span>: <span class="num">3</span>,
+      <span class="kw">"name"</span>:  <span class="str">"image_signed"</span>,
+      <span class="kw">"source"</span>: <span class="str">"event.image_signed"</span>,
+      <span class="kw">"transform"</span>: <span class="str">"bool_to_float"</span>
+    },
+    {
+      <span class="kw">"index"</span>: <span class="num">4</span>,
+      <span class="kw">"name"</span>:  <span class="str">"integrity_level_ord"</span>,
+      <span class="kw">"source"</span>: <span class="str">"event.integrity_level"</span>,
+      <span class="kw">"transform"</span>: <span class="str">"enum_ordinal"</span>,
+      <span class="kw">"mapping"</span>: { <span class="str">"Untrusted"</span>: <span class="num">0</span>, <span class="str">"Low"</span>: <span class="num">1</span>, <span class="str">"Medium"</span>: <span class="num">2</span>, <span class="str">"High"</span>: <span class="num">3</span>, <span class="str">"System"</span>: <span class="num">4</span> }
+    },
+    <span class="cmt">// ... up to index 127</span>
+  ]
+}</pre>
+  </div>
+
+  <h3>Allowed transforms</h3>
+  <p>The agent's <code>features.rs</code> implements exactly this allowlist. New transforms require a coordinated agent + training-pipeline change.</p>
+  <table class="dt">
+    <tr><th>Transform</th><th>Input → Output</th></tr>
+    <tr><td>identity</td><td>numeric → float32, no change</td></tr>
+    <tr><td>bool_to_float</td><td>bool → 0.0 / 1.0</td></tr>
+    <tr><td>len</td><td>string → length</td></tr>
+    <tr><td>len_then_log1p</td><td>string → log(1 + length)</td></tr>
+    <tr><td>shannon_entropy</td><td>string → entropy in bits</td></tr>
+    <tr><td>murmurhash3_mod_N</td><td>string → murmur3(s) mod N (feature hashing)</td></tr>
+    <tr><td>token_count_by_delim</td><td>string → split on delim, count</td></tr>
+    <tr><td>enum_ordinal</td><td>enum → integer per <code>mapping</code></td></tr>
+    <tr><td>hour_of_day</td><td>timestamp → 0..23</td></tr>
+    <tr><td>day_of_week</td><td>timestamp → 0..6</td></tr>
+    <tr><td>process_chain_depth</td><td>pid → ancestor count from process_tree</td></tr>
+  </table>
+
+  <h3>Per-tenant config</h3>
+  <div class="code-block">
+    <div class="code-label"><span>ML-001.config.yml</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">model_id:</span> ML-001
+<span class="kw">enabled:</span> <span class="num">true</span>
+
+<span class="kw">thresholds:</span>
+  <span class="kw">low:</span>      <span class="num">0.50</span>     <span class="cmt"># enrich event but don't alert</span>
+  <span class="kw">medium:</span>   <span class="num">0.75</span>     <span class="cmt"># alert at severity=medium</span>
+  <span class="kw">high:</span>     <span class="num">0.90</span>     <span class="cmt"># alert at severity=high</span>
+  <span class="kw">critical:</span> <span class="num">0.97</span>     <span class="cmt"># alert + auto_action</span>
+
+<span class="kw">auto_action_at_critical:</span> <span class="str">suspend_process</span>
+<span class="kw">dedup_window_seconds:</span> <span class="num">120</span>
+
+<span class="cmt"># Per-tenant overrides distributed via the same delta path
+# as Sigma rules — SOC-1 can tune without ML team involvement.</span></pre>
+  </div>
+
+  <div class="note warn">The agent enforces the same "auto_action only on critical" rule for ML alerts. <code>auto_action_at_critical</code> is the ONLY auto-action knob exposed for ML. Tuning thresholds is fine; tuning the action is locked.</div>
+</section>
+
+<!-- ══════════════ MITRE TACTICS & TECHNIQUES ══════════════ -->
+<section class="section" id="mitre">
+  <div class="page-eyebrow">Cross-cutting · MITRE ATT&amp;CK</div>
+  <div class="page-title">Tactics &amp; Techniques</div>
+  <div class="page-desc">Every rule maps to one primary MITRE technique plus zero-or-more secondary techniques. Primary is what the rule's match directly indicates; secondaries are broader attack-chain context. This page is the schema for the <code>mitre:</code> block referenced from every other rule type's universal fields.</div>
+
+  <h3>Why primary + secondary, not a flat list</h3>
+  <p>Production EDR consoles (CrowdStrike, SentinelOne, Defender, Elastic) all converge on the same pattern: <strong>one technique gets the spotlight in alert lists, all techniques get stored for heatmaps and pivoting</strong>. If an alert shows up under three tactics simultaneously, it floods the SOC's tactic-filtered queue three times. The rule author picks the primary; the others are context.</p>
+
+  <table class="dt">
+    <tr><th>Where it shows</th><th>What's displayed</th></tr>
+    <tr><td>Alert list view</td><td>Primary tactic + technique only ("Execution — PowerShell")</td></tr>
+    <tr><td>Alert detail view</td><td>Primary at top + all secondaries grouped by tactic</td></tr>
+    <tr><td>MITRE heatmap dashboard</td><td>Counts both primary and secondaries — one alert with 3 techniques adds +1 to each cell</td></tr>
+    <tr><td>"Show similar alerts" pivot</td><td>Pivots on primary by default; clicking a secondary repivots</td></tr>
+    <tr><td>API filter <code>?tactic=execution</code></td><td>Matches if execution is primary OR a secondary</td></tr>
+  </table>
+
+  <h3>The block — structure and required fields</h3>
+  <div class="code-block">
+    <div class="code-label"><span>mitre block — full schema</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">mitre:</span>
+  <span class="kw">primary:</span>                              <span class="cmt"># REQUIRED — single object</span>
+    <span class="kw">tactic_id:</span>    TA0002              <span class="cmt"># MITRE tactic ID</span>
+    <span class="kw">tactic:</span>       <span class="str">"execution"</span>         <span class="cmt"># tactic name (lowercase-hyphenated)</span>
+    <span class="kw">technique_id:</span> T1059.001           <span class="cmt"># MITRE technique ID (sub-techniques OK)</span>
+    <span class="kw">technique:</span>    <span class="str">"PowerShell"</span>        <span class="cmt"># technique name (human readable)</span>
+
+  <span class="kw">secondary:</span>                            <span class="cmt"># OPTIONAL — list of objects</span>
+    - <span class="kw">tactic_id:</span>    TA0001
+      <span class="kw">tactic:</span>       <span class="str">"initial-access"</span>
+      <span class="kw">technique_id:</span> T1566.001
+      <span class="kw">technique:</span>    <span class="str">"Spearphishing Attachment"</span>
+    - <span class="kw">tactic_id:</span>    TA0002
+      <span class="kw">tactic:</span>       <span class="str">"execution"</span>
+      <span class="kw">technique_id:</span> T1204.002
+      <span class="kw">technique:</span>    <span class="str">"Malicious File"</span></pre>
+  </div>
+
+  <h3>Per-entry fields — all four are required</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>tactic_id</td><td class="type">string</td><td>Always <code>TAxxxx</code> format. The 14 MITRE Enterprise tactic IDs.</td></tr>
+    <tr><td>tactic</td><td class="type">string</td><td>Lowercase-hyphenated name (e.g. <code>credential-access</code>). Matches MITRE's canonical short name.</td></tr>
+    <tr><td>technique_id</td><td class="type">string</td><td>Either <code>Txxxx</code> (top-level) or <code>Txxxx.yyy</code> (sub-technique). Always use the most specific available.</td></tr>
+    <tr><td>technique</td><td class="type">string</td><td>The official MITRE technique name. CI validates against the MITRE catalogue.</td></tr>
+  </table>
+
+  <div class="note">Duplicating <code>tactic_id</code> + <code>tactic</code> in every entry is intentional. It means the agent and console never have to do a join against a tactic table to display an alert — everything needed is in the rule itself. The tactic name is also what changes if MITRE renames a tactic; storing both gives a fast rename path.</div>
+
+  <h3>Choosing the primary — the rule of thumb</h3>
+  <p>The primary should answer <strong>"what did this process just do?"</strong> — not "what is the attacker's broader goal?". Concrete examples from the corpus:</p>
+
+  <table class="dt">
+    <tr><th>Rule</th><th>What fired</th><th>Primary chosen</th><th>Why</th></tr>
+    <tr><td>R-001 Office spawns shell</td><td>winword.exe spawned cmd.exe</td><td>Execution / T1059.001 (PowerShell)</td><td>The act that fired is execution. Spearphishing (the delivery) is implied — that's secondary.</td></tr>
+    <tr><td>R-003 Shadow copy delete</td><td>vssadmin delete shadows</td><td>Impact / T1490</td><td>Direct impact on recovery capability. No strong secondary.</td></tr>
+    <tr><td>R-007 LSASS access</td><td>cmdline contains sekurlsa</td><td>Credential Access / T1003.001</td><td>Singular intent — credential dumping.</td></tr>
+    <tr><td>R-012 Run key write</td><td>RegSet to Run\</td><td>Persistence / T1547.001</td><td>The write IS persistence. No secondary.</td></tr>
+    <tr><td>Y-005 LockBit YARA</td><td>YARA hit on LockBit binary</td><td>Impact / T1486 (Encryption)</td><td>Primary purpose of the binary. Inhibit System Recovery (T1490) is secondary.</td></tr>
+    <tr><td>CP-001 Office→shell→download</td><td>3-stage chain</td><td>Execution / T1059.001</td><td>The chain's final stage is the strongest signal. Secondary: Spearphishing + Ingress Tool Transfer.</td></tr>
+  </table>
+
+  <h3>Tactic catalogue (MITRE Enterprise — 14 tactics)</h3>
+  <table class="dt">
+    <tr><th>tactic_id</th><th>tactic</th><th>What it means</th></tr>
+    <tr><td>TA0001</td><td>initial-access</td><td>How the attacker got in</td></tr>
+    <tr><td>TA0002</td><td>execution</td><td>Running attacker-controlled code</td></tr>
+    <tr><td>TA0003</td><td>persistence</td><td>Surviving reboot / re-login</td></tr>
+    <tr><td>TA0004</td><td>privilege-escalation</td><td>Gaining higher privileges</td></tr>
+    <tr><td>TA0005</td><td>defense-evasion</td><td>Avoiding detection / disabling defenses</td></tr>
+    <tr><td>TA0006</td><td>credential-access</td><td>Stealing credentials</td></tr>
+    <tr><td>TA0007</td><td>discovery</td><td>Mapping the environment</td></tr>
+    <tr><td>TA0008</td><td>lateral-movement</td><td>Moving between hosts</td></tr>
+    <tr><td>TA0009</td><td>collection</td><td>Gathering data of interest</td></tr>
+    <tr><td>TA0010</td><td>exfiltration</td><td>Stealing data out</td></tr>
+    <tr><td>TA0011</td><td>command-and-control</td><td>Maintaining attacker comms</td></tr>
+    <tr><td>TA0040</td><td>impact</td><td>Disrupt / destroy / encrypt</td></tr>
+    <tr><td>TA0042</td><td>resource-development</td><td>Building infrastructure (mostly pre-attack — rarely used in EDR rules)</td></tr>
+    <tr><td>TA0043</td><td>reconnaissance</td><td>External-facing recon (rarely in EDR rules — that's the attacker's pre-EDR phase)</td></tr>
+  </table>
+
+  <h3>How each engine carries the block</h3>
+
+  <h4>Sigma + Behavioral (YAML) — native nested block</h4>
+  <div class="code-block">
+    <div class="code-label"><span>R-001 — embedded in YAML</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">id:</span> R-001
+<span class="kw">title:</span> Office application spawns command shell
+<span class="kw">severity:</span> critical
+
+<span class="kw">mitre:</span>
+  <span class="kw">primary:</span>
+    <span class="kw">tactic_id:</span> TA0002
+    <span class="kw">tactic:</span> <span class="str">"execution"</span>
+    <span class="kw">technique_id:</span> T1059.001
+    <span class="kw">technique:</span> <span class="str">"PowerShell"</span>
+  <span class="kw">secondary:</span>
+    - <span class="kw">tactic_id:</span> TA0001
+      <span class="kw">tactic:</span> <span class="str">"initial-access"</span>
+      <span class="kw">technique_id:</span> T1566.001
+      <span class="kw">technique:</span> <span class="str">"Spearphishing Attachment"</span>
+    - <span class="kw">tactic_id:</span> TA0002
+      <span class="kw">tactic:</span> <span class="str">"execution"</span>
+      <span class="kw">technique_id:</span> T1204.002
+      <span class="kw">technique:</span> <span class="str">"Malicious File"</span>
+
+<span class="kw">event_type:</span> ProcessStart
+<span class="cmt"># ... rest of rule ...</span></pre>
+  </div>
+
+  <h4>YARA — flattened to scalar meta keys</h4>
+  <p>YARA's meta block only holds scalars (strings, numbers, bools) — it can't carry a nested object. The information is split into separate scalar keys, with secondaries packed into a single semicolon-delimited string:</p>
+  <div class="code-block">
+    <div class="code-label"><span>Y-002 — flattened in YARA meta</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">rule</span> <span class="fn">Y_002_Mimikatz</span>
+{
+    <span class="kw">meta:</span>
+        <span class="kw">id</span>                         = <span class="str">"Y-002"</span>
+        <span class="kw">family</span>                     = <span class="str">"Mimikatz"</span>
+        <span class="kw">severity</span>                   = <span class="str">"critical"</span>
+        <span class="kw">mitre_primary_tactic</span>       = <span class="str">"credential-access"</span>
+        <span class="kw">mitre_primary_tactic_id</span>    = <span class="str">"TA0006"</span>
+        <span class="kw">mitre_primary_technique_id</span> = <span class="str">"T1003.001"</span>
+        <span class="kw">mitre_primary_technique</span>    = <span class="str">"LSASS Memory"</span>
+        <span class="cmt">// Format: "tactic_id/technique_id/technique_name;tactic_id/..."</span>
+        <span class="kw">mitre_secondary</span>            = <span class="str">""</span>     <span class="cmt">// empty for Y-002 — single technique only</span>
+
+    <span class="kw">strings:</span>
+        <span class="cmt">// ...</span>
+    <span class="kw">condition:</span>
+        <span class="cmt">// ...</span>
+}</pre>
+  </div>
+  <p>The build pipeline parses the flattened YARA fields back into the same structured object before bundling — agents and consoles see a single uniform schema regardless of source.</p>
+
+  <h3>In the AlertRecord output</h3>
+  <p>When a rule fires, the full structured MITRE block is copied into the alert. The alert console can render the primary in the list view and pop the full set in the detail panel without any extra lookup.</p>
+  <div class="code-block">
+    <div class="code-label"><span>AlertRecord — mitre field</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre>{
+  <span class="cmt">// ... other AlertRecord fields ...</span>
+
+  <span class="kw">"mitre"</span>: {
+    <span class="kw">"primary"</span>: {
+      <span class="kw">"tactic_id"</span>:    <span class="str">"TA0002"</span>,
+      <span class="kw">"tactic"</span>:       <span class="str">"execution"</span>,
+      <span class="kw">"technique_id"</span>: <span class="str">"T1059.001"</span>,
+      <span class="kw">"technique"</span>:    <span class="str">"PowerShell"</span>
+    },
+    <span class="kw">"secondary"</span>: [
+      {
+        <span class="kw">"tactic_id"</span>:    <span class="str">"TA0001"</span>,
+        <span class="kw">"tactic"</span>:       <span class="str">"initial-access"</span>,
+        <span class="kw">"technique_id"</span>: <span class="str">"T1566.001"</span>,
+        <span class="kw">"technique"</span>:    <span class="str">"Spearphishing Attachment"</span>
+      }
+    ]
+  }
+}</pre>
+  </div>
+
+  <h3>Backend storage — columns in the alert table</h3>
+  <p>To keep "filter by tactic" queries fast, the primary fields are denormalized to dedicated columns; secondaries live in a JSON array column.</p>
+  <table class="dt">
+    <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>mitre_primary_tactic_id</td><td>LowCardinality(String)</td><td>Indexed. Filter axis in console.</td></tr>
+    <tr><td>mitre_primary_tactic</td><td>LowCardinality(String)</td><td>For display without lookup.</td></tr>
+    <tr><td>mitre_primary_technique_id</td><td>LowCardinality(String)</td><td>Indexed.</td></tr>
+    <tr><td>mitre_primary_technique</td><td>String</td><td>Display name.</td></tr>
+    <tr><td>mitre_secondary_technique_ids</td><td>Array(String)</td><td>Indexed for tactic-filter queries that match either primary or secondary.</td></tr>
+    <tr><td>mitre_secondary_json</td><td>String</td><td>Full secondary array as JSON. Read on alert detail open.</td></tr>
+  </table>
+
+  <h3>Heatmap query — counting both</h3>
+  <p>The MITRE heatmap on the dashboard counts every technique cited in every alert. The query is union-over-primary-and-secondaries:</p>
+  <div class="code-block">
+    <div class="code-label"><span>ClickHouse — MITRE heatmap query</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">SELECT</span>
+    technique_id,
+    technique,
+    tactic_id,
+    tactic,
+    <span class="kw">count</span>() <span class="kw">AS</span> hit_count
+<span class="kw">FROM</span> (
+    <span class="cmt">-- primaries</span>
+    <span class="kw">SELECT</span>
+        mitre_primary_technique_id  <span class="kw">AS</span> technique_id,
+        mitre_primary_technique     <span class="kw">AS</span> technique,
+        mitre_primary_tactic_id     <span class="kw">AS</span> tactic_id,
+        mitre_primary_tactic        <span class="kw">AS</span> tactic
+    <span class="kw">FROM</span> alerts
+    <span class="kw">WHERE</span> timestamp_utc &gt;= <span class="kw">now</span>() - <span class="kw">INTERVAL</span> 7 <span class="kw">DAY</span>
+
+    <span class="kw">UNION ALL</span>
+
+    <span class="cmt">-- secondaries (array-joined)</span>
+    <span class="kw">SELECT</span>
+        JSONExtractString(s, <span class="str">'technique_id'</span>) <span class="kw">AS</span> technique_id,
+        JSONExtractString(s, <span class="str">'technique'</span>)    <span class="kw">AS</span> technique,
+        JSONExtractString(s, <span class="str">'tactic_id'</span>)    <span class="kw">AS</span> tactic_id,
+        JSONExtractString(s, <span class="str">'tactic'</span>)       <span class="kw">AS</span> tactic
+    <span class="kw">FROM</span> alerts
+    <span class="kw">ARRAY JOIN</span> JSONExtractArrayRaw(mitre_secondary_json) <span class="kw">AS</span> s
+    <span class="kw">WHERE</span> timestamp_utc &gt;= <span class="kw">now</span>() - <span class="kw">INTERVAL</span> 7 <span class="kw">DAY</span>
+)
+<span class="kw">GROUP BY</span> technique_id, technique, tactic_id, tactic
+<span class="kw">ORDER BY</span> hit_count <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <h3>What CI rejects</h3>
+  <table class="dt">
+    <tr><th>Reject reason</th><th>Why</th></tr>
+    <tr><td>Missing <code>primary</code></td><td>Every rule must declare what fired</td></tr>
+    <tr><td>Multiple primaries</td><td><code>primary</code> is a single object, not a list. Use <code>secondary</code> for additional techniques.</td></tr>
+    <tr><td><code>tactic_id</code> not in the 14-tactic catalogue</td><td>Typo guard</td></tr>
+    <tr><td><code>technique_id</code> not in MITRE's published catalogue</td><td>Validated against MITRE's CTI repo at CI time</td></tr>
+    <tr><td><code>tactic</code> doesn't match <code>tactic_id</code></td><td>Both must be present and consistent — protects against rename drift</td></tr>
+    <tr><td><code>technique</code> doesn't match <code>technique_id</code></td><td>Same — must match MITRE's official name</td></tr>
+    <tr><td>Same technique appears in both primary and secondary</td><td>Redundant — would double-count in heatmap</td></tr>
+    <tr><td>YARA rule missing any of the <code>mitre_primary_*</code> meta keys</td><td>All four are required (tactic, tactic_id, technique, technique_id)</td></tr>
+  </table>
+
+  <h3>Maintaining the catalogue</h3>
+  <p>MITRE updates the ATT&CK framework roughly twice a year. New techniques get added; some get deprecated. The CI MITRE validator pulls from <code>https://github.com/mitre/cti</code> (the official STIX 2.x repo) on build, so new techniques become valid automatically. Deprecated techniques generate a warning, not a reject — give SOC-1 a quarter to migrate.</p>
+</section>
+
+<!-- ══════════════ FP TUNING LOG ══════════════ -->
+<section class="section" id="fptuning">
+  <div class="page-eyebrow">Cross-cutting · FP tuning</div>
+  <div class="page-title">FP tuning log</div>
+  <div class="page-desc">Every filter change to a stable rule (adding a known-good carve-out to suppress a false positive) is recorded in <code>FP_TUNING_LOG.md</code> in the rules repo. The log is the authoritative history of WHY each filter exists, signed off by SOC-1, and required reading before any filter edit. This page is the schema for what goes in that log and the <code>revision</code> field on rules.</div>
+
+  <h3>Why a dedicated log</h3>
+  <p>Filters accumulate over time. Without a written record, three things break:</p>
+  <table class="dt">
+    <tr><th>Failure mode</th><th>How the log prevents it</th></tr>
+    <tr><td>New authors revert hard-won FP fixes during cleanup</td><td>Every filter has a signed-off entry — reverting requires a counter-entry, not a stealth edit</td></tr>
+    <tr><td>Customer asks "why didn't you alert on X?" and SOC can't answer</td><td>The log is searchable by rule ID — find the filter, find the FP report that motivated it</td></tr>
+    <tr><td>CI soak test catches FP, gets fixed, then regresses 6 months later</td><td>The FP scenario becomes a permanent fixture in <code>tests/fp_corpus/</code> when the entry is added</td></tr>
+  </table>
+
+  <h3>The <code>revision</code> field — version vs revision</h3>
+  <p>Every rule carries two version-tracking fields. They serve different audiences.</p>
+  <table class="dt">
+    <tr><th>Field</th><th>Bumps when</th><th>Semantic</th></tr>
+    <tr><td><code>version</code></td><td>Detection logic changes — selection, condition, thresholds, or what events the rule looks at</td><td>"Rule got smarter / different"</td></tr>
+    <tr><td><code>revision</code></td><td>Only filters tuned (FP suppression). Rule fires on the same things; it just suppresses known-good cases more accurately</td><td>"Rule got quieter"</td></tr>
+  </table>
+  <p>Separating these matters for two reasons. First, the CI manifest can tell the agent "your rule got noisier from version 4 to 5" vs "your rule got quieter from revision 1 to 2 of version 4". Second, customers who want stable detection behaviour with their own FP tuning can opt to receive only <code>version</code> changes — <code>revision</code> bumps stay on the server side as suggested tunings.</p>
+
+  <h3>Log entry schema</h3>
+  <table class="dt">
+    <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+    <tr><td>date</td><td>yes</td><td>ISO date the filter landed</td></tr>
+    <tr><td>rule</td><td>yes</td><td>Rule ID (R-NNN, Y-NNN, etc.)</td></tr>
+    <tr><td>filter_added</td><td>yes</td><td>The literal filter clause, copy-pasteable</td></tr>
+    <tr><td>suppresses</td><td>yes</td><td>One-line description of the FP case</td></tr>
+    <tr><td>real_attack_still_caught</td><td>yes</td><td>Yes/no + one-line justification. If "no," the filter is too broad and should be tightened.</td></tr>
+    <tr><td>filter_type</td><td>yes</td><td><code>narrow</code> · <code>signer</code> · <code>path</code> · <code>combo</code> · <code>behavioral</code></td></tr>
+    <tr><td>author</td><td>yes</td><td>SOC-1 member who signed off</td></tr>
+    <tr><td>fixture_path</td><td>recommended</td><td>Path to the CI fixture that captures this FP — proves the filter works</td></tr>
+  </table>
+
+  <h3>Filter type policy</h3>
+  <table class="dt">
+    <tr><th>Type</th><th>What it is</th><th>When to use</th></tr>
+    <tr><td>narrow</td><td>Specific name pattern, path, or hash. Targeted carve-out.</td><td>When the FP is a single tool with a predictable artifact</td></tr>
+    <tr><td>signer</td><td>Parent or self code-signing identity check. Tight allowlist.</td><td>When a vendor signs every binary in a workflow</td></tr>
+    <tr><td>path</td><td>Directory or path prefix.</td><td>Discouraged. Attackers can drop binaries anywhere. Only use when path is OS-managed.</td></tr>
+    <tr><td>combo</td><td>narrow + signer. <strong>The recommended default for new filters.</strong></td><td>Almost always. Generalizes without being too broad.</td></tr>
+    <tr><td>behavioral</td><td>Adjust counter threshold or window without changing what's filtered.</td><td>For counter-based rules where the FP is rate / volume, not identity</td></tr>
+  </table>
+
+  <div class="note warn"><strong>Signer-only is never "signed by anyone."</strong> Code-signing certs leak and get stolen — a 2022 NVIDIA breach yielded certs that were then used to sign malware. Every signer filter MUST specify a tight allowlist of signer substrings, validated against the approved trusted-vendor list in <code>FP_TUNING_LOG.md</code>.</div>
+
+  <h3>Trusted-vendor list — adding a vendor</h3>
+  <p>The FP tuning log includes an "approved trusted-vendor list" of signer strings pre-cleared for parent-signer filters. Adding a vendor requires:</p>
+  <table class="dt">
+    <tr><th>Step</th><th>What's verified</th></tr>
+    <tr><td>1</td><td>Confirm exact Authenticode signer string from a known-good signed binary on a clean machine</td></tr>
+    <tr><td>2</td><td>Vendor has a published security disclosure process</td></tr>
+    <tr><td>3</td><td>Vendor has a code-signing key custodianship policy</td></tr>
+    <tr><td>4</td><td>PR adds vendor to the table AND to the specific rule's <code>parent_image_signer</code> list, with FP-log entry citing the customer report or soak-test result</td></tr>
+  </table>
+
+  <h3>Example entry — R-021 Claude Code CLI filter</h3>
+  <div class="code-block">
+    <div class="code-label"><span>Markdown table row from FP_TUNING_LOG.md</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre>| <span class="num">2026-05-11</span> | R-021 | <span class="str">`target_path|re: '\\claude-[a-z0-9-]+-cwd\.exe$'`</span>  | Claude Code CLI temp helper binaries in %TEMP%  | <span class="kw">Yes.</span> Pattern is tool-specific (Anthropic-shipped name) and matches only a binary signed by Anthropic | narrow | SOC-1 |
+| <span class="num">2026-05-11</span> | R-021 | <span class="str">`parent_image_signer|contains|any: [anthropic, microsoft, jetbrains, github inc, docker inc, hashicorp, cursor ai]`</span> | Signed dev-tool vendor processes writing temp helpers | <span class="kw">Yes.</span> Real malware in TEMP comes from unsigned or untrusted-vendor parents (Office macros, browsers, scripts) | signer | SOC-1 |</pre>
+  </div>
+
+  <h3>Reverting a filter</h3>
+  <p>To revert a filter — e.g. a previously-trusted vendor's signing key is compromised — open a counter-entry. Do NOT silently remove the original entry; the audit trail must remain intact.</p>
+  <table class="dt">
+    <tr><th>Step</th><th>Action</th></tr>
+    <tr><td>1</td><td>Counter-entry: same date, "Filter added" column reads <code>REVERTED &lt;original-date&gt;</code></td></tr>
+    <tr><td>2</td><td>Drop the corresponding CI fixture so it stops being asserted as "must NOT alert"</td></tr>
+    <tr><td>3</td><td>Bump <code>revision</code> on the rule</td></tr>
+    <tr><td>4</td><td>Run the corpus to verify no fresh FPs surface — if they do, the revert needs a replacement filter, not just removal</td></tr>
+  </table>
+
+  <h3>What CI rejects</h3>
+  <table class="dt">
+    <tr><th>Reject reason</th><th>Why</th></tr>
+    <tr><td>Filter added to a stable rule without a corresponding FP_TUNING_LOG entry</td><td>Audit trail enforcement</td></tr>
+    <tr><td>Signer filter referencing a vendor not in the approved trusted-vendor list</td><td>Prevents ad-hoc vendor-trust decisions</td></tr>
+    <tr><td>Signer filter matching only on <code>image_signed: true</code> with no signer substring</td><td>Stolen-cert risk — must be specific</td></tr>
+    <tr><td>Filter edit without <code>revision</code> bump</td><td>Version-tracking integrity</td></tr>
+    <tr><td>FP log entry with "real_attack_still_caught: no"</td><td>Filter is too broad — block until tightened</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ MANIFEST ══════════════ -->
+<section class="section" id="manifest">
+  <div class="page-eyebrow">Cross-cutting · Manifest</div>
+  <div class="page-title">Bundle manifest</div>
+  <div class="page-desc">The single index file that ties every rule artifact in a bundle together. Signed server-side, verified by the agent before atomic-swap. This is what the agent's heartbeat compares against to know whether to pull an update.</div>
+
+  <div class="code-block">
+    <div class="code-label"><span>manifest.json</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre>{
+  <span class="kw">"bundle_version"</span>:   <span class="num">4711</span>,
+  <span class="kw">"schema_version"</span>:   <span class="str">"1.0"</span>,
+  <span class="kw">"generated_at"</span>:     <span class="str">"2026-05-04T10:00:00Z"</span>,
+  <span class="kw">"tenant_id"</span>:        <span class="str">"acme-corp"</span>,
+  <span class="kw">"signature"</span>:        <span class="str">"ed25519:..."</span>,    <span class="cmt">// over the canonical-JSON of this file</span>
+
+  <span class="kw">"rules"</span>: [
+    {
+      <span class="kw">"rule_id"</span>:      <span class="str">"sigma.process.R-001_office_spawns_shell"</span>,
+      <span class="kw">"type"</span>:         <span class="str">"sigma"</span>,
+      <span class="kw">"path"</span>:         <span class="str">"sigma/process/R-001_office_spawns_shell.yml"</span>,
+      <span class="kw">"content_hash"</span>: <span class="str">"sha256:abcd..."</span>,
+      <span class="kw">"event_type"</span>:   <span class="str">"ProcessStart"</span>,
+      <span class="kw">"severity"</span>:     <span class="str">"critical"</span>,
+      <span class="kw">"status"</span>:       <span class="str">"stable"</span>,
+      <span class="kw">"version"</span>:      <span class="num">7</span>
+    },
+    {
+      <span class="kw">"rule_id"</span>:      <span class="str">"yara.compiled"</span>,
+      <span class="kw">"type"</span>:         <span class="str">"yara_compiled"</span>,
+      <span class="kw">"path"</span>:         <span class="str">"yara/all.yrc"</span>,
+      <span class="kw">"content_hash"</span>: <span class="str">"sha256:..."</span>,
+      <span class="kw">"rule_count"</span>:   <span class="num">20</span>,
+      <span class="kw">"size_bytes"</span>:   <span class="num">154623</span>,
+      <span class="kw">"status"</span>:       <span class="str">"stable"</span>,
+      <span class="kw">"version"</span>:      <span class="num">12</span>
+    },
+    {
+      <span class="kw">"rule_id"</span>:      <span class="str">"behavioral.compiled"</span>,
+      <span class="kw">"type"</span>:         <span class="str">"behavioral_compiled"</span>,
+      <span class="kw">"path"</span>:         <span class="str">"behavioral/chains.msgpack"</span>,
+      <span class="kw">"content_hash"</span>: <span class="str">"sha256:..."</span>,
+      <span class="kw">"rule_count"</span>:   <span class="num">10</span>,
+      <span class="kw">"status"</span>:       <span class="str">"stable"</span>,
+      <span class="kw">"version"</span>:      <span class="num">5</span>
+    },
+    {
+      <span class="kw">"rule_id"</span>:      <span class="str">"signatures.malshare.blocklist"</span>,
+      <span class="kw">"type"</span>:         <span class="str">"bloom"</span>,
+      <span class="kw">"path"</span>:         <span class="str">"signatures/malshare.bloom"</span>,
+      <span class="kw">"content_hash"</span>: <span class="str">"sha256:..."</span>,
+      <span class="kw">"fp_rate"</span>:      <span class="num">0.0001</span>,
+      <span class="kw">"n_items"</span>:      <span class="num">4812993</span>,
+      <span class="kw">"status"</span>:       <span class="str">"stable"</span>,
+      <span class="kw">"version"</span>:      <span class="num">19</span>
+    },
+    {
+      <span class="kw">"rule_id"</span>:      <span class="str">"signatures.allowlist"</span>,
+      <span class="kw">"type"</span>:         <span class="str">"bloom"</span>,
+      <span class="kw">"path"</span>:         <span class="str">"signatures/allowlist.bloom"</span>,
+      <span class="kw">"content_hash"</span>: <span class="str">"sha256:..."</span>,
+      <span class="kw">"fp_rate"</span>:      <span class="num">0.001</span>,
+      <span class="kw">"n_items"</span>:      <span class="num">98421</span>,
+      <span class="kw">"status"</span>:       <span class="str">"stable"</span>,
+      <span class="kw">"version"</span>:      <span class="num">8</span>
+    },
+    {
+      <span class="kw">"rule_id"</span>:      <span class="str">"ml.process_anomaly"</span>,
+      <span class="kw">"type"</span>:         <span class="str">"ml_model"</span>,
+      <span class="kw">"path"</span>:         <span class="str">"ml/ML-001.onnx"</span>,
+      <span class="kw">"content_hash"</span>: <span class="str">"sha256:..."</span>,
+      <span class="kw">"feature_spec_path"</span>: <span class="str">"ml/ML-001.feature_spec.json"</span>,
+      <span class="kw">"feature_spec_hash"</span>: <span class="str">"sha256:..."</span>,
+      <span class="kw">"feature_version"</span>: <span class="num">3</span>,
+      <span class="kw">"size_bytes"</span>:   <span class="num">2087936</span>,
+      <span class="kw">"status"</span>:       <span class="str">"stable"</span>,
+      <span class="kw">"version"</span>:      <span class="num">14</span>
+    }
+  ],
+
+  <span class="kw">"per_type_hashes"</span>: {
+    <span class="kw">"sigma"</span>:        <span class="str">"sha256:..."</span>,    <span class="cmt">// hash of all sigma content_hashes concatenated</span>
+    <span class="kw">"yara"</span>:         <span class="str">"sha256:..."</span>,
+    <span class="kw">"behavioral"</span>:   <span class="str">"sha256:..."</span>,
+    <span class="kw">"signatures"</span>:   <span class="str">"sha256:..."</span>,
+    <span class="kw">"ml"</span>:           <span class="str">"sha256:..."</span>
+  }
+}</pre>
+  </div>
+
+  <p>The <code>per_type_hashes</code> field is what the agent sends in heartbeats. The server compares per-type hashes; only changed types get a delta. This is how the heartbeat stays small (~200 bytes) regardless of total rule count.</p>
+
+  <h3>Delta protocol shape</h3>
+  <div class="code-block">
+    <div class="code-label"><span>HeartbeatRequest / RuleDelta</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">message</span> <span class="ty">HeartbeatRequest</span> {
+  <span class="ty">string</span> agent_id            = <span class="num">1</span>;
+  <span class="ty">uint64</span> current_bundle_version = <span class="num">2</span>;
+  <span class="ty">map&lt;string, string&gt;</span> per_type_hashes = <span class="num">3</span>;     <span class="cmt">// from manifest</span>
+  <span class="ty">RuleHealth</span> health           = <span class="num">4</span>;
+}
+
+<span class="kw">message</span> <span class="ty">HeartbeatResponse</span> {
+  <span class="ty">uint64</span> new_bundle_version  = <span class="num">1</span>;
+  <span class="ty">repeated RuleDelta</span> deltas    = <span class="num">2</span>;     <span class="cmt">// only changed rules</span>
+  <span class="ty">FullBundleRef</span> full_bundle    = <span class="num">3</span>;     <span class="cmt">// set only if delta&gt;30% or agent&gt;5 versions behind</span>
+}
+
+<span class="kw">message</span> <span class="ty">RuleDelta</span> {
+  <span class="ty">string</span> rule_id    = <span class="num">1</span>;
+  <span class="ty">DeltaAction</span> action = <span class="num">2</span>;     <span class="cmt">// ADDED · CHANGED · REMOVED</span>
+  <span class="ty">bytes</span>  content    = <span class="num">3</span>;     <span class="cmt">// raw rule bytes (YAML / .yrc / .bloom / .onnx)</span>
+  <span class="ty">string</span> content_hash = <span class="num">4</span>;
+}
+
+<span class="kw">message</span> <span class="ty">RuleHealth</span> {
+  <span class="ty">repeated string</span> failed_rule_ids = <span class="num">1</span>;
+  <span class="ty">uint32</span>  dropped_events_per_min = <span class="num">2</span>;
+  <span class="ty">uint32</span>  active_rule_count      = <span class="num">3</span>;
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════ ALERT ══════════════ -->
+<section class="section" id="alert">
+  <div class="page-eyebrow">Cross-cutting · Output</div>
+  <div class="page-title">AlertRecord — every engine outputs this</div>
+  <div class="page-desc">All five detection engines emit the same struct. Backend is engine-agnostic — it doesn't care whether the alert came from Sigma, YARA, behavioral, signature, or ML. Common fields are required; engine-specific extras live in the <code>engine_data</code> map.</div>
+
+  <div class="code-block">
+    <div class="code-label"><span>AlertRecord</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre>{
+  <span class="cmt">// Identity / routing</span>
+  <span class="kw">"alert_id"</span>:           <span class="str">"01HZQ0X7YK2E9AQNZK..."</span>,    <span class="cmt">// ULID, agent-generated</span>
+  <span class="kw">"agent_id"</span>:           <span class="str">"0a4f...."</span>,
+  <span class="kw">"tenant_id"</span>:          <span class="str">"acme-corp"</span>,                  <span class="cmt">// stamped server-side from mTLS cert</span>
+  <span class="kw">"timestamp_utc"</span>:      <span class="str">"2026-05-06T14:23:01.451Z"</span>,
+  <span class="kw">"schema_version"</span>:     <span class="str">"1.0"</span>,
+
+  <span class="cmt">// Detection metadata</span>
+  <span class="kw">"engine"</span>:             <span class="str">"sigma"</span>,    <span class="cmt">// sigma · yara · behavioral · signature · ml</span>
+  <span class="kw">"rule_id"</span>:            <span class="str">"R-001"</span>,
+  <span class="kw">"rule_title"</span>:         <span class="str">"Office application spawns command shell"</span>,
+  <span class="kw">"rule_version"</span>:       <span class="num">7</span>,
+  <span class="kw">"severity"</span>:           <span class="str">"critical"</span>,
+  <span class="kw">"confidence"</span>:         <span class="num">1.0</span>,                          <span class="cmt">// 1.0 for rules; 0–1 for ML</span>
+  <span class="kw">"mitre"</span>: {
+    <span class="kw">"primary"</span>: {
+      <span class="kw">"tactic_id"</span>:    <span class="str">"TA0002"</span>,
+      <span class="kw">"tactic"</span>:       <span class="str">"execution"</span>,
+      <span class="kw">"technique_id"</span>: <span class="str">"T1059.001"</span>,
+      <span class="kw">"technique"</span>:    <span class="str">"PowerShell"</span>
+    },
+    <span class="kw">"secondary"</span>: [
+      {
+        <span class="kw">"tactic_id"</span>:    <span class="str">"TA0001"</span>,
+        <span class="kw">"tactic"</span>:       <span class="str">"initial-access"</span>,
+        <span class="kw">"technique_id"</span>: <span class="str">"T1566.001"</span>,
+        <span class="kw">"technique"</span>:    <span class="str">"Spearphishing Attachment"</span>
+      }
+    ]
+  },
+  <span class="kw">"tags"</span>:               [<span class="str">"macro"</span>, <span class="str">"phishing"</span>],
+
+  <span class="cmt">// Subject — what triggered the alert</span>
+  <span class="kw">"process"</span>: {
+    <span class="kw">"pid"</span>:               <span class="num">9224</span>,
+    <span class="kw">"name"</span>:              <span class="str">"powershell.exe"</span>,
+    <span class="kw">"image_path"</span>:        <span class="str">"c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"</span>,
+    <span class="kw">"command_line"</span>:      <span class="str">"powershell -nop -w hidden -enc abcd..."</span>,
+    <span class="kw">"image_signed"</span>:      <span class="num">true</span>,
+    <span class="kw">"image_signer"</span>:      <span class="str">"Microsoft Windows"</span>,
+    <span class="kw">"integrity_level"</span>:   <span class="str">"Medium"</span>,
+    <span class="kw">"user_name"</span>:         <span class="str">"acme\\jdoe"</span>
+  },
+
+  <span class="cmt">// Process chain — last 5 ancestors, oldest first</span>
+  <span class="kw">"process_chain"</span>: [
+    { <span class="kw">"pid"</span>: <span class="num">812</span>,  <span class="kw">"name"</span>: <span class="str">"explorer.exe"</span> },
+    { <span class="kw">"pid"</span>: <span class="num">5188</span>, <span class="kw">"name"</span>: <span class="str">"winword.exe"</span> },
+    { <span class="kw">"pid"</span>: <span class="num">9224</span>, <span class="kw">"name"</span>: <span class="str">"powershell.exe"</span> }
+  ],
+
+  <span class="cmt">// Optional subject extensions — present only when relevant</span>
+  <span class="kw">"file"</span>: {
+    <span class="kw">"path"</span>:    <span class="str">"c:\\users\\jdoe\\appdata\\local\\temp\\beacon.exe"</span>,
+    <span class="kw">"sha256"</span>:  <span class="str">"deadbeef..."</span>,
+    <span class="kw">"size"</span>:    <span class="num">1048576</span>
+  },
+  <span class="kw">"network"</span>: {
+    <span class="kw">"protocol"</span>:  <span class="str">"Tcp"</span>,
+    <span class="kw">"direction"</span>: <span class="str">"Outbound"</span>,
+    <span class="kw">"dst_ip"</span>:    <span class="str">"203.0.113.42"</span>,
+    <span class="kw">"dst_port"</span>:  <span class="num">443</span>,
+    <span class="kw">"dst_hostname"</span>: <span class="str">"api.suspicious.example"</span>
+  },
+
+  <span class="cmt">// Response action taken (if any)</span>
+  <span class="kw">"auto_action_taken"</span>:  <span class="str">"suspend_process"</span>,    <span class="cmt">// none · suspend_process · quarantine_file</span>
+  <span class="kw">"auto_action_result"</span>: <span class="str">"success"</span>,            <span class="cmt">// success · failed · skipped</span>
+
+  <span class="cmt">// Engine-specific extras — schema varies per engine</span>
+  <span class="kw">"engine_data"</span>: {
+    <span class="cmt">// Sigma:    { matched_selection: "selection_a" }
+    // YARA:     { matched_strings: ["sleep_mask_a", "named_pipe"] }
+    // Bloom:    { feed: "malshare", verdict: "malicious", family: "lockbit" }
+    // Behav:    { stages_matched: ["stage_office", "stage_shell"], window_used_ms: 1820 }
+    // ML:       { score: 0.987, feature_version: 3, model_version: 14 }</span>
+  }
+}</pre>
+  </div>
+
+  <h3>Validation rules</h3>
+  <table class="dt">
+    <tr><th>Rule</th><th>Notes</th></tr>
+    <tr><td>tenant_id is server-stamped, not agent-trusted</td><td>Server overwrites whatever agent sends with cert-derived tenant_id (see EX-D-003)</td></tr>
+    <tr><td>alert_id must be ULID</td><td>Time-sortable, generated agent-side, idempotent on replay</td></tr>
+    <tr><td>process_chain capped at 5 entries</td><td>Larger chains aren't useful for triage and bloat the index</td></tr>
+    <tr><td>command_line truncated at 8 KB</td><td>With marker if truncated. Same approach as registry value data</td></tr>
+    <tr><td>auto_action_taken=none if severity != critical</td><td>Backend rejects mismatched combinations</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ EVENT ══════════════ -->
+<section class="section" id="event">
+  <div class="page-eyebrow">Cross-cutting · Input</div>
+  <div class="page-title">NormalizedEvent — what rules match against</div>
+  <div class="page-desc">The single struct produced by the collector and consumed by every detection engine. Rules reference these field names exactly. Adding a new field requires bumping <code>schema_version</code>; renaming or removing a field is a breaking change requiring fleet-wide coordinated rule updates.</div>
+
+  <div class="code-block">
+    <div class="code-label"><span>NormalizedEvent — Rust types (canonical)</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">pub struct</span> <span class="ty">NormalizedEvent</span> {
+    <span class="cmt">// Identity / routing</span>
+    <span class="kw">pub</span> schema_version:   <span class="ty">String</span>,                       <span class="cmt">// "1.0"</span>
+    <span class="kw">pub</span> agent_id:         <span class="ty">Uuid</span>,
+    <span class="kw">pub</span> host_id:          <span class="ty">String</span>,
+    <span class="kw">pub</span> tenant_id:        <span class="ty">String</span>,
+    <span class="kw">pub</span> timestamp_utc_ns: <span class="ty">i64</span>,
+
+    <span class="cmt">// Event type — used by Sigma's pre-filter</span>
+    <span class="kw">pub</span> event_type: <span class="ty">EventType</span>,    <span class="cmt">// see enum below</span>
+
+    <span class="cmt">// Process context — present on every event</span>
+    <span class="kw">pub</span> pid:                  <span class="ty">u32</span>,
+    <span class="kw">pub</span> ppid:                 <span class="ty">u32</span>,
+    <span class="kw">pub</span> session_id:           <span class="ty">u32</span>,
+    <span class="kw">pub</span> logon_id:             <span class="ty">u64</span>,
+    <span class="kw">pub</span> user_sid:             <span class="ty">String</span>,
+    <span class="kw">pub</span> user_name:            <span class="ty">String</span>,
+    <span class="kw">pub</span> process_name:         <span class="ty">String</span>,    <span class="cmt">// lowercase basename: "powershell.exe"</span>
+    <span class="kw">pub</span> image_path:           <span class="ty">String</span>,    <span class="cmt">// lowercase Win32: "c:\\windows\\..."</span>
+    <span class="kw">pub</span> command_line:         <span class="ty">String</span>,
+    <span class="kw">pub</span> parent_name:          <span class="ty">String</span>,
+    <span class="kw">pub</span> parent_image_path:    <span class="ty">String</span>,
+    <span class="kw">pub</span> parent_command_line:  <span class="ty">String</span>,
+    <span class="kw">pub</span> integrity_level:      <span class="ty">IntegrityLevel</span>,
+    <span class="kw">pub</span> image_signed:         <span class="ty">bool</span>,
+    <span class="kw">pub</span> image_signer:         <span class="ty">String</span>,
+
+    <span class="cmt">// Type-specific payloads</span>
+    <span class="kw">pub</span> file:     <span class="ty">Option&lt;FileFields&gt;</span>,
+    <span class="kw">pub</span> network:  <span class="ty">Option&lt;NetworkFields&gt;</span>,
+    <span class="kw">pub</span> registry: <span class="ty">Option&lt;RegistryFields&gt;</span>,
+    <span class="kw">pub</span> dns:      <span class="ty">Option&lt;DnsFields&gt;</span>,
+    <span class="kw">pub</span> image:    <span class="ty">Option&lt;ImageLoadFields&gt;</span>,
+    <span class="kw">pub</span> stop:     <span class="ty">Option&lt;ProcessStopFields&gt;</span>,
+    <span class="kw">pub</span> memory:   <span class="ty">Option&lt;MemoryFields&gt;</span>,    <span class="cmt">// Phase 3 — TI provider</span>
+}
+
+<span class="kw">pub enum</span> <span class="ty">EventType</span> {
+    ProcessStart, ProcessStop,
+    FileCreate, FileWrite, FileClose,
+    RegSet, RegDelete,
+    NetConnect, NetAccept,
+    DnsQuery,
+    ImageLoad, ThreadCreate,
+    MemoryEvent,    <span class="cmt">// Phase 3</span>
+}
+
+<span class="kw">pub struct</span> <span class="ty">FileFields</span> {
+    <span class="kw">pub</span> target_path:      <span class="ty">String</span>,    <span class="cmt">// lowercase Win32</span>
+    <span class="kw">pub</span> target_extension: <span class="ty">String</span>,    <span class="cmt">// includes leading dot, lowercase</span>
+    <span class="kw">pub</span> file_action:      <span class="ty">FileAction</span>,  <span class="cmt">// Created · Modified · Renamed · Deleted</span>
+    <span class="kw">pub</span> file_size:        <span class="ty">u64</span>,
+    <span class="kw">pub</span> old_path:         <span class="ty">Option&lt;String&gt;</span>,    <span class="cmt">// rename only</span>
+}
+
+<span class="kw">pub struct</span> <span class="ty">NetworkFields</span> {
+    <span class="kw">pub</span> protocol:     <span class="ty">Protocol</span>,        <span class="cmt">// Tcp · Udp · Icmp</span>
+    <span class="kw">pub</span> direction:    <span class="ty">Direction</span>,       <span class="cmt">// Inbound · Outbound</span>
+    <span class="kw">pub</span> src_ip:       <span class="ty">String</span>,
+    <span class="kw">pub</span> src_port:     <span class="ty">u16</span>,
+    <span class="kw">pub</span> dst_ip:       <span class="ty">String</span>,
+    <span class="kw">pub</span> dst_port:     <span class="ty">u16</span>,
+    <span class="kw">pub</span> dst_hostname: <span class="ty">String</span>,        <span class="cmt">// from DNS cache, may be empty</span>
+    <span class="kw">pub</span> bytes_sent:   <span class="ty">u64</span>,
+    <span class="kw">pub</span> bytes_recv:   <span class="ty">u64</span>,
+    <span class="kw">pub</span> owning_pid:   <span class="ty">u32</span>,
+}
+
+<span class="kw">pub struct</span> <span class="ty">RegistryFields</span> {
+    <span class="kw">pub</span> reg_key:        <span class="ty">String</span>,         <span class="cmt">// lowercase</span>
+    <span class="kw">pub</span> reg_value_name: <span class="ty">String</span>,
+    <span class="kw">pub</span> reg_value_type: <span class="ty">RegValueType</span>,   <span class="cmt">// RegSz · RegDword · RegBinary · ...</span>
+    <span class="kw">pub</span> reg_value_data: <span class="ty">String</span>,         <span class="cmt">// truncated at 4 KB default</span>
+}
+
+<span class="kw">pub struct</span> <span class="ty">DnsFields</span> {
+    <span class="kw">pub</span> query_name:    <span class="ty">String</span>,         <span class="cmt">// lowercase FQDN</span>
+    <span class="kw">pub</span> query_type:    <span class="ty">DnsType</span>,         <span class="cmt">// A · AAAA · TXT · MX · ...</span>
+    <span class="kw">pub</span> query_length:  <span class="ty">u32</span>,
+    <span class="kw">pub</span> query_entropy: <span class="ty">f32</span>,             <span class="cmt">// Shannon entropy, computed on agent</span>
+    <span class="kw">pub</span> response_ips:  <span class="ty">Vec&lt;String&gt;</span>,
+    <span class="kw">pub</span> rcode:         <span class="ty">u8</span>,
+    <span class="kw">pub</span> via:           <span class="ty">DnsTransport</span>,    <span class="cmt">// System · DoH · DoT · Direct</span>
+}
+
+<span class="kw">pub struct</span> <span class="ty">ImageLoadFields</span> {
+    <span class="kw">pub</span> module_path:   <span class="ty">String</span>,
+    <span class="kw">pub</span> module_size:   <span class="ty">u64</span>,
+    <span class="kw">pub</span> image_signed:  <span class="ty">bool</span>,
+    <span class="kw">pub</span> image_signer:  <span class="ty">String</span>,
+}
+
+<span class="kw">pub struct</span> <span class="ty">ProcessStopFields</span> {
+    <span class="kw">pub</span> exit_code: <span class="ty">i32</span>,
+}
+
+<span class="kw">pub struct</span> <span class="ty">MemoryFields</span> {                 <span class="cmt">// Phase 3 — TI provider gated</span>
+    <span class="kw">pub</span> operation:   <span class="ty">MemoryOp</span>,           <span class="cmt">// OpenProcess · VirtualAllocEx · ...</span>
+    <span class="kw">pub</span> target_pid:  <span class="ty">u32</span>,
+    <span class="kw">pub</span> access_mask: <span class="ty">u32</span>,
+    <span class="kw">pub</span> region_size: <span class="ty">u64</span>,
+}</pre>
+  </div>
+
+  <h3>Rule-author quick reference — which fields exist on which event</h3>
+  <p>This is the single table to memorize. Sigma rules use these field names exactly; YARA doesn't see the event; behavioral chains use them in stage selectors.</p>
+  <table class="dt">
+    <tr><th>event_type</th><th>Always populated</th><th>Type-specific</th></tr>
+    <tr><td>ProcessStart</td><td>process_*, parent_*, integrity_level, image_signed, image_signer, user_*</td><td>—</td></tr>
+    <tr><td>ProcessStop</td><td>process_*, pid, ppid</td><td>exit_code</td></tr>
+    <tr><td>FileCreate / FileWrite / FileClose</td><td>process_*, image_path</td><td>target_path, target_extension, file_action, file_size, old_path?</td></tr>
+    <tr><td>RegSet / RegDelete</td><td>process_*, image_path</td><td>reg_key, reg_value_name, reg_value_type, reg_value_data</td></tr>
+    <tr><td>NetConnect / NetAccept</td><td>process_*, image_path</td><td>protocol, direction, src/dst ip+port, dst_hostname, owning_pid</td></tr>
+    <tr><td>DnsQuery</td><td>process_*</td><td>query_name, query_type, query_length, query_entropy, response_ips, rcode</td></tr>
+    <tr><td>ImageLoad</td><td>process_*</td><td>module_path, module_size, image_signed, image_signer</td></tr>
+    <tr><td>MemoryEvent (P3)</td><td>process_*</td><td>operation, target_pid, access_mask, region_size</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ PROCESS TREE ══════════════ -->
+<section class="section" id="tree">
+  <div class="page-eyebrow">Cross-cutting · Process Tree</div>
+  <div class="page-title">Process tree &amp; lineage</div>
+  <div class="page-desc">Every event reaching detection is enriched with parent context — but for behavioral chains, alert investigation, and ML features the agent needs more than just immediate parent. It needs the full ancestry, the descendants, and stable identity that survives PID reuse. This page is the schema for the in-memory process tree, how it gets populated, and the fields it exposes to rules and alerts.</div>
+
+  <h3>Why a tree, not just parent pointers</h3>
+  <p>Windows reuses PIDs. A short-lived PID 1234 (notepad) can exit, then 30 seconds later PID 1234 (cmd.exe spawned by powershell) gets created. If an alert fires later citing "PID 1234's parent was notepad" the SOC investigation goes off a cliff. Production EDRs solve this by minting a stable per-spawn identifier and persisting full ancestry in a tree the agent owns.</p>
+
+  <p>Three things the tree gives you that parent-on-event cannot:</p>
+  <table class="dt">
+    <tr><th>Capability</th><th>Why it needs the tree</th></tr>
+    <tr><td>Full chain in alerts (5–10 ancestors deep)</td><td>Single event only carries direct parent. Chain has to be walked from somewhere.</td></tr>
+    <tr><td>Behavioral chain rules with <code>parent_match</code></td><td>Stage 3 needs to know stage 1's PID was an ancestor — not just direct parent.</td></tr>
+    <tr><td>Stable identity across PID reuse</td><td><code>process_uid</code> survives even when Windows hands the PID to a different process later.</td></tr>
+    <tr><td>Descendant queries (kill the whole chain)</td><td>Auto-action <code>suspend_chain</code> needs to walk down from a PID, not up.</td></tr>
+    <tr><td>Process lifetime metrics for ML features</td><td>"How long has this process been alive" requires <code>start_time</code> kept somewhere.</td></tr>
+  </table>
+
+  <h3>ProcessNode — the per-process record</h3>
+  <p>Lives in <code>HashMap&lt;u32, ProcessNode&gt;</code> on the agent (keyed by PID). Bounded at 8K entries — eviction policy is "exited &gt; 60s ago + no pending child events". Snapshot serialized to SQLite every <code>state_sync_interval</code> for crash recovery.</p>
+
+  <div class="code-block">
+    <div class="code-label"><span>ProcessNode — agent in-memory schema</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">pub struct</span> <span class="ty">ProcessNode</span> {
+    <span class="cmt">// === Identity ===</span>
+    <span class="kw">pub</span> pid:               <span class="ty">u32</span>,                  <span class="cmt">// Windows PID — reused over time</span>
+    <span class="kw">pub</span> ppid:              <span class="ty">u32</span>,                  <span class="cmt">// parent PID at spawn</span>
+    <span class="kw">pub</span> process_uid:       <span class="ty">Ulid</span>,                 <span class="cmt">// stable agent-minted ID (UNIQUE per spawn)</span>
+    <span class="kw">pub</span> parent_uid:        <span class="ty">Option&lt;Ulid&gt;</span>,         <span class="cmt">// parent's process_uid (None if parent unknown)</span>
+    <span class="kw">pub</span> root_uid:          <span class="ty">Ulid</span>,                 <span class="cmt">// top-of-tree ancestor's uid</span>
+    <span class="kw">pub</span> session_id:        <span class="ty">u32</span>,
+    <span class="kw">pub</span> logon_id:          <span class="ty">u64</span>,
+    <span class="kw">pub</span> user_sid:          <span class="ty">String</span>,
+    <span class="kw">pub</span> user_name:         <span class="ty">String</span>,
+
+    <span class="cmt">// === Program identity ===</span>
+    <span class="kw">pub</span> process_name:      <span class="ty">String</span>,               <span class="cmt">// lowercase basename "powershell.exe"</span>
+    <span class="kw">pub</span> image_path:        <span class="ty">String</span>,               <span class="cmt">// lowercase Win32 path</span>
+    <span class="kw">pub</span> command_line:      <span class="ty">String</span>,               <span class="cmt">// full, lowercase, truncated at 8KB</span>
+    <span class="kw">pub</span> image_sha256:      <span class="ty">String</span>,               <span class="cmt">// hash of binary on disk</span>
+    <span class="kw">pub</span> image_signed:      <span class="ty">bool</span>,
+    <span class="kw">pub</span> image_signer:      <span class="ty">String</span>,
+    <span class="kw">pub</span> integrity_level:   <span class="ty">IntegrityLevel</span>,
+
+    <span class="cmt">// === Lifecycle ===</span>
+    <span class="kw">pub</span> start_time_ns:     <span class="ty">i64</span>,                  <span class="cmt">// nanos since epoch</span>
+    <span class="kw">pub</span> stop_time_ns:      <span class="ty">Option&lt;i64&gt;</span>,
+    <span class="kw">pub</span> exit_code:         <span class="ty">Option&lt;i32&gt;</span>,
+    <span class="kw">pub</span> state:             <span class="ty">ProcessState</span>,         <span class="cmt">// Running · Stopped · Suspended · Quarantined</span>
+
+    <span class="cmt">// === Tree structure ===</span>
+    <span class="kw">pub</span> children:          <span class="ty">SmallVec&lt;[u32; 4]&gt;</span>,    <span class="cmt">// child PIDs (size hint: 4)</span>
+    <span class="kw">pub</span> depth:             <span class="ty">u8</span>,                   <span class="cmt">// distance from root_uid</span>
+
+    <span class="cmt">// === Counters used by behavioral / ML — incremented per event ===</span>
+    <span class="kw">pub</span> file_writes_total: <span class="ty">u32</span>,
+    <span class="kw">pub</span> net_outbound_total:<span class="ty">u32</span>,
+    <span class="kw">pub</span> child_spawn_total: <span class="ty">u32</span>,
+    <span class="kw">pub</span> distinct_extensions_written: <span class="ty">u32</span>,
+    <span class="kw">pub</span> first_outbound_ip: <span class="ty">Option&lt;String&gt;</span>,
+
+    <span class="cmt">// === Chain pattern state ===
+    // bitset of behavioral stages this process has matched
+    // — used by chain matcher to short-circuit on later events</span>
+    <span class="kw">pub</span> matched_stages:    <span class="ty">u64</span>,                  <span class="cmt">// bit N = matched stage N</span>
+    <span class="kw">pub</span> capture_bag:       <span class="ty">SmallMap&lt;String, String, 4&gt;</span>,  <span class="cmt">// stage captures (e.g. reg_value_data)</span>
+}</pre>
+  </div>
+
+  <h3>process_uid — why ULID, not PID</h3>
+  <p>PIDs reuse, ULIDs don't. Every <code>ProcessStart</code> mints a fresh ULID. The ULID becomes the stable identity used in alerts, in the alert console, and in any cross-system correlation. PID stays around for runtime indexing (it's what arrives on every event), but the ULID is the truth.</p>
+
+  <table class="dt">
+    <tr><th>Field</th><th>Used for</th><th>Persists across</th></tr>
+    <tr><td>pid</td><td>Runtime lookup, ETW correlation</td><td>Process lifetime only — recycled by Windows</td></tr>
+    <tr><td>process_uid</td><td>Alert correlation, history queries</td><td>Forever — never reused, never collides</td></tr>
+    <tr><td>parent_uid</td><td>Stable parent reference in alerts</td><td>Forever — points to a specific spawn</td></tr>
+    <tr><td>root_uid</td><td>"Show me everything from this attack"</td><td>Forever — anchors a whole chain</td></tr>
+  </table>
+
+  <div class="note">ULIDs are time-sortable, so <code>WHERE root_uid = X ORDER BY process_uid</code> in ClickHouse / OpenSearch returns the ancestry in spawn order naturally.</div>
+
+  <h3>Tree population — what happens on each event</h3>
+  <table class="dt">
+    <tr><th>Event</th><th>Tree action</th></tr>
+    <tr><td>ProcessStart</td><td>Mint <code>process_uid</code>. Look up parent by PID. If parent absent (race or out-of-order), enqueue per the EX-C-003 hold-buffer. Set <code>parent_uid</code> + <code>root_uid</code>. Push self into parent's <code>children</code>. Set depth = parent.depth + 1.</td></tr>
+    <tr><td>ProcessStop</td><td>Set <code>stop_time_ns</code>, <code>exit_code</code>, <code>state = Stopped</code>. Don't remove yet — wait 60s for late child events. Then evict and remove from parent's children.</td></tr>
+    <tr><td>FileClose / NetConnect / RegSet etc.</td><td>Increment relevant counter on the owning process node. Update <code>matched_stages</code> if this event satisfies a chain stage selector.</td></tr>
+    <tr><td>Suspend / Quarantine action</td><td>Set <code>state</code> accordingly so subsequent rules know this PID is already neutralized.</td></tr>
+  </table>
+
+  <h3>Lookup operations the engines need</h3>
+  <p>Engines and the alert builder don't read <code>ProcessNode</code> fields directly — they call these query functions. Implementation lives in <code>state/process_tree.rs</code>.</p>
+
+  <div class="code-block">
+    <div class="code-label"><span>process_tree.rs — public API</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">impl</span> <span class="ty">ProcessTree</span> {
+    <span class="cmt">// === Single-process lookups ===</span>
+    <span class="kw">pub fn</span> <span class="fn">get</span>(&amp;<span class="kw">self</span>, pid: <span class="ty">u32</span>) -&gt; <span class="ty">Option&lt;&amp;ProcessNode&gt;</span>;
+    <span class="kw">pub fn</span> <span class="fn">get_by_uid</span>(&amp;<span class="kw">self</span>, uid: <span class="ty">Ulid</span>) -&gt; <span class="ty">Option&lt;&amp;ProcessNode&gt;</span>;
+
+    <span class="cmt">// === Ancestry walks ===
+    // Returns oldest-first (root → self), capped at `depth`.</span>
+    <span class="kw">pub fn</span> <span class="fn">ancestry</span>(&amp;<span class="kw">self</span>, pid: <span class="ty">u32</span>, depth: <span class="ty">u8</span>) -&gt; <span class="ty">Vec&lt;ChainEntry&gt;</span>;
+
+    <span class="cmt">// "Is `ancestor_pid` in `pid`'s ancestry chain?"
+    // Used by behavioral parent_match.</span>
+    <span class="kw">pub fn</span> <span class="fn">is_descendant_of</span>(&amp;<span class="kw">self</span>, pid: <span class="ty">u32</span>, ancestor_pid: <span class="ty">u32</span>) -&gt; <span class="ty">bool</span>;
+    <span class="kw">pub fn</span> <span class="fn">is_descendant_of_uid</span>(&amp;<span class="kw">self</span>, pid: <span class="ty">u32</span>, ancestor_uid: <span class="ty">Ulid</span>) -&gt; <span class="ty">bool</span>;
+
+    <span class="cmt">// === Descendant walks ===
+    // Used by suspend_chain auto-action.</span>
+    <span class="kw">pub fn</span> <span class="fn">descendants</span>(&amp;<span class="kw">self</span>, pid: <span class="ty">u32</span>) -&gt; <span class="ty">Vec&lt;u32&gt;</span>;
+
+    <span class="cmt">// === Chain stage matching ===
+    // True if `pid` (or any ancestor up to `max_depth`) has matched stage `stage_id`
+    // within `window_seconds` ago.</span>
+    <span class="kw">pub fn</span> <span class="fn">ancestor_matched_stage</span>(
+        &amp;<span class="kw">self</span>, pid: <span class="ty">u32</span>, stage_id: <span class="ty">u8</span>,
+        max_depth: <span class="ty">u8</span>, window_seconds: <span class="ty">u32</span>,
+    ) -&gt; <span class="ty">Option&lt;Ulid&gt;</span>;    <span class="cmt">// returns the matching ancestor's uid</span>
+
+    <span class="cmt">// === Capture access ===
+    // Look up a value captured at an earlier stage.</span>
+    <span class="kw">pub fn</span> <span class="fn">get_capture</span>(&amp;<span class="kw">self</span>, uid: <span class="ty">Ulid</span>, key: &amp;<span class="ty">str</span>) -&gt; <span class="ty">Option&lt;&amp;str&gt;</span>;
+}</pre>
+  </div>
+
+  <h3>ChainEntry — what gets embedded in alerts</h3>
+  <p>Every AlertRecord carries a <code>process_chain</code> field of up to 5 ancestors. <code>ChainEntry</code> is the per-ancestor shape. Sized for backend storage and SOC readability — full ProcessNode would be too large.</p>
+
+  <div class="code-block">
+    <div class="code-label"><span>ChainEntry</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="kw">pub struct</span> <span class="ty">ChainEntry</span> {
+    <span class="kw">pub</span> process_uid:    <span class="ty">Ulid</span>,             <span class="cmt">// stable identity</span>
+    <span class="kw">pub</span> pid:            <span class="ty">u32</span>,
+    <span class="kw">pub</span> name:           <span class="ty">String</span>,           <span class="cmt">// e.g. "powershell.exe"</span>
+    <span class="kw">pub</span> image_path:     <span class="ty">String</span>,
+    <span class="kw">pub</span> command_line:   <span class="ty">String</span>,           <span class="cmt">// truncated to 512 bytes for chain inclusion</span>
+    <span class="kw">pub</span> image_signed:   <span class="ty">bool</span>,
+    <span class="kw">pub</span> image_signer:   <span class="ty">String</span>,
+    <span class="kw">pub</span> start_time_ns:  <span class="ty">i64</span>,
+    <span class="kw">pub</span> integrity:      <span class="ty">IntegrityLevel</span>,
+    <span class="kw">pub</span> depth:          <span class="ty">u8</span>,               <span class="cmt">// distance from leaf (0 = self, 1 = parent, ...)</span>
+}</pre>
+  </div>
+
+  <h3>How rules reference the tree — by engine</h3>
+
+  <h4>Sigma — direct parent only (cheap)</h4>
+  <p>Sigma's match loop is per-event and stateless. It uses the immediate parent fields already on <code>NormalizedEvent</code> — no tree walk per match (would blow the perf budget). For "grandparent" detection, write a behavioral chain rule instead.</p>
+  <pre><span class="kw">selection:</span>
+  <span class="kw">parent_image_path|endswith:</span> <span class="str">'\winword.exe'</span>
+  <span class="kw">process_name|endswith:</span> <span class="str">'\powershell.exe'</span></pre>
+
+  <h4>Behavioral — full ancestry via parent_match</h4>
+  <p>Chain rules use <code>parent_match: stage_name</code>. The matcher calls <code>ancestor_matched_stage()</code> which walks up to <code>max_depth</code> levels (default 5). This is how CP-001 stitches "office → shell → download" even though they're not direct parent-child at every step (PowerShell could spawn a helper that does the download).</p>
+  <pre><span class="kw">stages:</span>
+  - <span class="kw">name:</span> stage_office
+    <span class="kw">process_name|endswith|any:</span> [<span class="str">'\winword.exe'</span>, <span class="str">'\excel.exe'</span>]
+
+  - <span class="kw">name:</span> stage_download
+    <span class="kw">parent_match:</span> stage_office     <span class="cmt"># walks ancestry up to max_depth</span>
+    <span class="kw">parent_match_max_depth:</span> 5         <span class="cmt"># default — override per stage if needed</span>
+    <span class="kw">process_name|endswith:</span> <span class="str">'\certutil.exe'</span></pre>
+
+  <h4>ML — ancestry as feature vector</h4>
+  <p>The feature spec exposes ancestry through dedicated transforms. ML models that benefit most from lineage: process anomaly (parent process is highly predictive), lateral-movement (chain-of-RDP detection), persistence (was-spawned-by-installer-process).</p>
+  <table class="dt">
+    <tr><th>Transform</th><th>Output</th></tr>
+    <tr><td>process_chain_depth</td><td>u8 — number of ancestors</td></tr>
+    <tr><td>ancestor_signed_count</td><td>u8 — how many ancestors are signed</td></tr>
+    <tr><td>ancestor_name_bag(N)</td><td>N hash-bucketed flags — parent, grandparent, etc.</td></tr>
+    <tr><td>root_age_seconds</td><td>f32 — how long has the root been alive</td></tr>
+    <tr><td>ancestor_integrity_max</td><td>u8 — highest integrity level seen in chain</td></tr>
+  </table>
+
+  <h3>Embedding in AlertRecord — what the SOC sees</h3>
+  <div class="code-block">
+    <div class="code-label"><span>AlertRecord — process tree fields</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre>{
+  <span class="cmt">// ... other AlertRecord fields ...</span>
+
+  <span class="kw">"process"</span>: {
+    <span class="kw">"process_uid"</span>:      <span class="str">"01HZQ0X7YK..."</span>,
+    <span class="kw">"pid"</span>:              <span class="num">9224</span>,
+    <span class="kw">"name"</span>:             <span class="str">"powershell.exe"</span>,
+    <span class="kw">"image_path"</span>:       <span class="str">"c:\\windows\\system32\\..."</span>,
+    <span class="kw">"command_line"</span>:     <span class="str">"powershell -nop -enc abcd..."</span>,
+    <span class="kw">"image_signed"</span>:     <span class="num">true</span>,
+    <span class="kw">"integrity_level"</span>:  <span class="str">"Medium"</span>
+  },
+
+  <span class="kw">"process_chain"</span>: [
+    {
+      <span class="kw">"process_uid"</span>:  <span class="str">"01HZQ0X3..."</span>,
+      <span class="kw">"pid"</span>:          <span class="num">812</span>,
+      <span class="kw">"name"</span>:         <span class="str">"explorer.exe"</span>,
+      <span class="kw">"image_path"</span>:   <span class="str">"c:\\windows\\explorer.exe"</span>,
+      <span class="kw">"command_line"</span>: <span class="str">"c:\\windows\\explorer.exe"</span>,
+      <span class="kw">"image_signed"</span>: <span class="num">true</span>,
+      <span class="kw">"image_signer"</span>: <span class="str">"Microsoft Windows"</span>,
+      <span class="kw">"start_time_ns"</span>: <span class="num">1746540122000000000</span>,
+      <span class="kw">"depth"</span>: <span class="num">3</span>     <span class="cmt">// 3 = root</span>
+    },
+    {
+      <span class="kw">"process_uid"</span>:  <span class="str">"01HZQ0X5..."</span>,
+      <span class="kw">"pid"</span>:          <span class="num">5188</span>,
+      <span class="kw">"name"</span>:         <span class="str">"winword.exe"</span>,
+      <span class="kw">"image_path"</span>:   <span class="str">"c:\\program files\\microsoft office\\..."</span>,
+      <span class="kw">"command_line"</span>: <span class="str">"\"winword.exe\" /n \"invoice.docx\""</span>,
+      <span class="kw">"image_signed"</span>: <span class="num">true</span>,
+      <span class="kw">"image_signer"</span>: <span class="str">"Microsoft Corporation"</span>,
+      <span class="kw">"start_time_ns"</span>: <span class="num">1746540180000000000</span>,
+      <span class="kw">"depth"</span>: <span class="num">2</span>
+    },
+    {
+      <span class="kw">"process_uid"</span>:  <span class="str">"01HZQ0X7..."</span>,
+      <span class="kw">"pid"</span>:          <span class="num">9224</span>,
+      <span class="kw">"name"</span>:         <span class="str">"powershell.exe"</span>,
+      <span class="kw">"image_path"</span>:   <span class="str">"c:\\windows\\system32\\..."</span>,
+      <span class="kw">"command_line"</span>: <span class="str">"powershell -nop -enc abcd..."</span>,
+      <span class="kw">"image_signed"</span>: <span class="num">true</span>,
+      <span class="kw">"image_signer"</span>: <span class="str">"Microsoft Windows"</span>,
+      <span class="kw">"start_time_ns"</span>: <span class="num">1746540215000000000</span>,
+      <span class="kw">"depth"</span>: <span class="num">1</span>     <span class="cmt">// 1 = direct parent of subject (depth=0)</span>
+    }
+  ],
+
+  <span class="cmt">// Subject (depth=0) is described by the "process" field above —
+  // it's NOT repeated in process_chain to keep the structure unambiguous.</span>
+
+  <span class="kw">"chain_root_uid"</span>: <span class="str">"01HZQ0X3..."</span>,    <span class="cmt">// shortcut for backend "find related alerts"</span>
+  <span class="kw">"chain_truncated"</span>: <span class="num">false</span>           <span class="cmt">// true if real chain &gt; 5 ancestors</span>
+}</pre>
+  </div>
+
+  <h3>Backend storage — alert table columns</h3>
+  <p>The chain is denormalized into the alert table for query speed. ClickHouse / OpenSearch query "show me all alerts in this attack" becomes a fast index-scan on <code>chain_root_uid</code>.</p>
+  <table class="dt">
+    <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+    <tr><td>process_uid</td><td>String (ULID)</td><td>Subject's stable id. Indexed.</td></tr>
+    <tr><td>parent_uid</td><td>Nullable(String)</td><td>Direct parent's stable id. Indexed.</td></tr>
+    <tr><td>chain_root_uid</td><td>String</td><td>Top-of-tree ancestor. Indexed — primary axis for "alerts in same incident".</td></tr>
+    <tr><td>chain_depth</td><td>UInt8</td><td>How deep in the tree this alert's subject was.</td></tr>
+    <tr><td>process_chain_json</td><td>String</td><td>Full chain as JSON for the SOC console.</td></tr>
+    <tr><td>chain_truncated</td><td>UInt8</td><td>1 if real chain &gt; 5 ancestors.</td></tr>
+  </table>
+
+  <h3>Auto-action on the tree — suspend_chain semantics</h3>
+  <p>A new auto-action on top of <code>suspend_process</code>: <code>suspend_chain</code> walks descendants of the matched PID and suspends them all. Used by ransomware detection (kill the encryption process AND any helpers it spawned) and by chain-rule auto-action (kill the whole 3-stage chain, not just the leaf).</p>
+
+  <div class="code-block">
+    <div class="code-label"><span>auto_action: suspend_chain — execution</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+<pre><span class="cmt">// Pseudocode — response/suspend.rs</span>
+<span class="kw">fn</span> <span class="fn">suspend_chain</span>(tree: &amp;<span class="ty">ProcessTree</span>, root_pid: <span class="ty">u32</span>) -&gt; <span class="ty">SuspendResult</span> {
+    <span class="kw">let</span> targets = tree.<span class="fn">descendants</span>(root_pid);
+    <span class="kw">let mut</span> suspended = vec![];
+    <span class="kw">let mut</span> failed = vec![];
+
+    <span class="cmt">// Suspend leaf-first to prevent re-spawning during walk.</span>
+    <span class="kw">for</span> pid <span class="kw">in</span> targets.iter().rev() {
+        <span class="kw">match</span> nt_suspend_process(*pid) {
+            Ok(_)  =&gt; suspended.push(*pid),
+            Err(e) =&gt; failed.push((*pid, e)),
+        }
+    }
+    nt_suspend_process(root_pid).<span class="fn">ok</span>();    <span class="cmt">// suspend root last</span>
+
+    SuspendResult { suspended, failed }
+}</pre>
+  </div>
+
+  <div class="note warn"><code>suspend_chain</code> is ONLY allowed on Critical-severity rules — same gating as the other auto-actions. CI rejects on Medium/Low. The chain walk is bounded at 64 descendants to prevent runaway suspension during process-fork attacks.</div>
+
+  <h3>Memory budget — the tree is bounded</h3>
+  <table class="dt">
+    <tr><th>Metric</th><th>Cap</th><th>Eviction</th></tr>
+    <tr><td>Total ProcessNodes</td><td>8,000</td><td>Stopped &gt; 60s ago, no pending children</td></tr>
+    <tr><td>Children per node</td><td>Unbounded (counter), 64 (vec)</td><td>Vec spills to overflow map after 64</td></tr>
+    <tr><td>Capture bag entries per node</td><td>16</td><td>Compile-time error if rule defines more</td></tr>
+    <tr><td>Ancestry walk depth</td><td>20 (hard), 5 (default for alert chain)</td><td>Past 20 returns truncated + sets chain_truncated</td></tr>
+    <tr><td>Total RAM target</td><td>~6 MB</td><td>8K nodes × ~750 bytes each</td></tr>
+  </table>
+
+  <h3>What rule authors must know</h3>
+  <table class="dt">
+    <tr><th>Concept</th><th>What to remember</th></tr>
+    <tr><td>parent_* fields</td><td>Available on every event. Use in Sigma rules — they're cheap.</td></tr>
+    <tr><td>parent_match (chains)</td><td>Walks full ancestry, default depth 5. Use for multi-stage attack patterns where intermediate steps may vary.</td></tr>
+    <tr><td>process_uid</td><td>Don't reference it in rules — it's only meaningful in alerts. Rules match on names/paths/cmdlines.</td></tr>
+    <tr><td>chain_root_uid in console</td><td>Click "show related alerts" → backend query <code>WHERE chain_root_uid = X</code> returns the whole incident.</td></tr>
+    <tr><td>capture / matches_capture</td><td>Reach across stages for a specific value (e.g. binary path written to a Run key). Capped at 16 captures per chain.</td></tr>
+    <tr><td>suspend_chain</td><td>Use sparingly. Critical rules only. Useful for ransomware and confirmed multi-stage chains.</td></tr>
+  </table>
+</section>
+
+</main>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  event.currentTarget.classList.add('on');
+  window.scrollTo(0,0);
+}
+function cp(btn){
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='copied!';
+    setTimeout(()=>btn.textContent='copy',1800);
+  });
+}
+</script>
+</body>
+</html>

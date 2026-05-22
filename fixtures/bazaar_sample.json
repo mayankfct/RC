@@ -1,0 +1,55 @@
+{
+  "query_status": "ok",
+  "data": [
+    {
+      "sha256_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "md5_hash": "11111111111111111111111111111111",
+      "imphash": "22222222222222222222222222222222",
+      "signature": "LockBit",
+      "file_type": "exe",
+      "first_seen": "2026-05-20 10:00:00",
+      "last_seen": "2026-05-21 08:00:00",
+      "tags": ["lockbit", "ransomware"]
+    },
+    {
+      "sha256_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "md5_hash": "33333333333333333333333333333333",
+      "imphash": null,
+      "signature": "AgentTesla",
+      "file_type": "exe",
+      "first_seen": "2026-05-20 11:00:00",
+      "last_seen": "2026-05-20 12:00:00",
+      "tags": ["stealer"]
+    },
+    {
+      "sha256_hash": "ZZZ_not_a_valid_hash",
+      "md5_hash": null,
+      "imphash": null,
+      "signature": null,
+      "file_type": "dll",
+      "first_seen": "2026-05-19 09:00:00",
+      "last_seen": "2026-05-19 09:00:00",
+      "tags": []
+    },
+    {
+      "sha256_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "md5_hash": "44444444444444444444444444444444",
+      "imphash": "55555555555555555555555555555555",
+      "signature": "Emotet",
+      "file_type": "doc",
+      "first_seen": "2026-05-18 14:00:00",
+      "last_seen": "2026-05-19 10:00:00",
+      "tags": ["maldoc", "emotet"]
+    },
+    {
+      "sha256_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "md5_hash": "66666666666666666666666666666666",
+      "imphash": "77777777777777777777777777777777",
+      "signature": "Cobalt Strike",
+      "file_type": "exe",
+      "first_seen": "2026-05-17 22:00:00",
+      "last_seen": "2026-05-21 01:00:00",
+      "tags": ["c2", "cobalt-strike"]
+    }
+  ]
+}

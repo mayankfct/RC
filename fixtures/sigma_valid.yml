@@ -1,0 +1,22 @@
+title: Suspicious PowerShell Encoded Command
+id: 6c8073d0-9999-4f5a-b8a5-1234567890ab
+status: experimental
+description: Detects suspicious PowerShell invocations that use encoded commands, which is a common technique used by attackers to obfuscate their malicious scripts and bypass simple text-based detections.
+references:
+    - https://attack.mitre.org/techniques/T1059/001/
+author: Sigma Community
+date: 2024-01-15
+tags:
+    - attack.execution
+    - attack.t1059.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\powershell.exe'
+        CommandLine|contains:
+            - ' -enc '
+            - ' -encodedcommand '
+    condition: selection
+level: high

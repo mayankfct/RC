@@ -1,0 +1,19 @@
+title: DLL Drop Into System32
+id: 11111111-2222-3333-4444-666666666666
+status: experimental
+description: Detects DLL files dropped into the system32 directory. Persistence vector. Demo for PascalCase file_action.
+references:
+    - https://attack.mitre.org/techniques/T1543/003/
+author: Sigma Community
+date: 2024-04-01
+tags:
+    - attack.persistence
+    - attack.t1543.003
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith: '.dll'
+    condition: selection
+level: high
