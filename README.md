@@ -246,11 +246,13 @@ filter:                                       # optional — Shape A (map) or Sh
 - parent_image_signed: true
   parent_image_signer|contains|any: ['microsoft windows']
 tags:                                         # always includes 'imported' + 'source:<name>'
-- imported
-- source:fetch
+- imported                                    # +'imported:auto-mitre' if MITRE was defaulted
+- source:fetch                                # +'imported:auto-action' if auto_action was defaulted
 version: 1
 revision: 1
 dedup_window_seconds: 60
+auto_action: suspend_process                  # injected default per event_type
+                                              # (see "auto_action defaults" table)
 ```
 
 ### YARA output (`output/yara/Y-NNN_<family>.yar`)
@@ -272,6 +274,7 @@ rule Y_001_FamilyName                          # underscores in identifier
         author      = "ruleforge-converter (source: <source-name>)"
         date        = "YYYY-MM-DD"
         severity    = "critical"
+        auto_action = "quarantine_file"        # injected default for all YARA rules
         mitre       = "T1003.001"              # comma-joined technique IDs
         mitre_primary_tactic        = "credential-access"
         mitre_primary_tactic_id     = "TA0006"
@@ -338,6 +341,7 @@ TIMESTAMP: 2026-05-22T14:23:00Z
 | `bad_id_format` / `bad_status` / `bad_severity` / `bad_event_type` / `bad_modifier` / `not_lowercase` / `bad_regex` / `desc_too_short` / `bad_author` / `bad_date` | Validator findings on hand-written rules passed to `validate` |
 | `filter_and_trap`             | WARN only — single filter map mixing ≥3 field families                 |
 | `mitre_auto_injected`         | WARN — defaulted to `T1027` because upstream had no MITRE              |
+| `auto_action_non_critical`    | WARN — `auto_action` injected on a rule with severity ≠ critical (the default behavior for imports) |
 | `yara_no_pe_anchor`           | WARN — rule has filesize but no PE/ELF magic; scans every file under cap |
 | `yara_filesize_missing`       | WARN — filesize cap was auto-injected                                  |
 
@@ -505,6 +509,10 @@ duplicates to re-process.
 
 | What's missing upstream         | What RuleForge does                                                                | Surfaced as            |
 |---------------------------------|------------------------------------------------------------------------------------|------------------------|
+| Sigma `auto_action` (process events) | `auto_action: suspend_process` + `imported:auto-action` tag                  | `[WARN] auto_action_non_critical` (unless severity is already critical) |
+| Sigma `auto_action` (file events)    | `auto_action: quarantine_file` + `imported:auto-action` tag                  | same                   |
+| Sigma `auto_action` (net/dns events) | `auto_action: block_network` + `imported:auto-action` tag                    | same                   |
+| YARA `auto_action`              | `auto_action = "quarantine_file"` in the meta block                                | silent (YARA scans files; quarantine is the natural response) |
 | YARA `filesize` cap             | Injects `and filesize < 50MB` with `// auto-injected: filesize cap` comment        | `[WARN] yara_filesize_missing` |
 | YARA PE/ELF anchor              | Nothing (can't guess platform safely) — but doesn't reject either                  | `[WARN] yara_no_pe_anchor`     |
 | YARA MITRE tags                 | Defaults to `T1027 Obfuscated Files or Information`                                | `[WARN] mitre_auto_injected`   |
@@ -515,6 +523,20 @@ duplicates to re-process.
 | Sigma `file_event` category     | Adds `file_action: Created` (PascalCase enum)                                      | silent                 |
 | Sigma `file_change` category    | Adds `file_action: Modified`                                                       | silent                 |
 | Sigma `file_delete` category    | Adds `file_action: Deleted`                                                        | silent                 |
+
+### auto_action defaults at a glance
+
+| event_type                                                            | injected auto_action |
+|-----------------------------------------------------------------------|----------------------|
+| `FileCreate`, `FileClose`                                             | `quarantine_file`    |
+| `NetConnect`, `DnsQuery`                                              | `block_network`      |
+| `ProcessStart`, `ProcessStop`, `RegSet`, `RegDelete`, `ImageLoad`     | `suspend_process`    |
+| YARA (file-content match — all rules)                                 | `quarantine_file`    |
+
+Upstream rules that already declare `auto_action` are honored verbatim
+— the default is applied only when missing. Override the defaults
+centrally via the `SIGMA_AUTO_ACTION_BY_EVENT_TYPE` and
+`YARA_DEFAULT_AUTO_ACTION` module-level constants in `ruleforge.py`.
 
 ---
 
@@ -561,9 +583,11 @@ The single-file constraint is deliberate — see BUILD.md.
 
 ## Notes on the EaglEye schema this targets
 
-- **`auto_action`** is gated on `severity == critical` (production EDR
-  rule). RuleForge never sets it on imports (imports are always
-  `experimental`). `validate` correctly grades hand-written rules.
+- **`auto_action`** is auto-injected on every imported rule based on
+  event type (see "Auto-injections" table). The strict spec rule
+  ("only valid on severity=critical") is overridden so the converted
+  corpus is actionable immediately. The validator emits
+  `auto_action_non_critical` as a WARN — visible in the `[OK]` line.
 - **PascalCase enum values** (`Created`, `Modified`, `Outbound`, `Tcp`,
   `RegSz`, `System`, etc.) — the lowercase-literals validator exempts
   these fields per `RULE_AUTHORING.md` §3.
